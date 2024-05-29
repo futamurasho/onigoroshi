@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:onigoroshi_demo/screens/select_page.dart';
 import 'widgets/bluetooth_on_tile.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-
-import 'screens/start_page.dart';
 
 void main() {
   FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true);
@@ -37,13 +33,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;//extends State<MyHomePage>は規則
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+  //extends State<MyHomePage>は規則
 
   @override
   Widget build(BuildContext context) {

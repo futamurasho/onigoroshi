@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
 import 'dart:math';
-import 'package:onigoroshi_demo/screens/roulette_page.dart';
 import 'count_page.dart';
 //タイマーがランダムに止まる
 class StartPage extends StatefulWidget {
@@ -14,7 +13,6 @@ class StartPage extends StatefulWidget {
 
 class _StartPageState extends State<StartPage> {
   bool isVisible = true;//可視化のbool値
-  bool loadflag = false;
   int _counter = 0;//初期値
   bool stopflag = true;
   Timer? _timer;
@@ -38,14 +36,8 @@ class _StartPageState extends State<StartPage> {
     return Scaffold(
       appBar: AppBar(
         leadingWidth: 85,
-        leading: TextButton(
-            child: const Text(
-              '戻る',
-              style: TextStyle(
-                fontFamily:'Yuji',
-                fontSize:20,
-              ),
-            ),
+        leading: IconButton(
+            icon: Icon(Icons.arrow_back),
             onPressed: () => Navigator.of(context).pop()
         ),
       ),
@@ -68,17 +60,6 @@ class _StartPageState extends State<StartPage> {
                           visible: !isVisible && stopflag,
                           child: const Text('飲め！！'),
                         ),
-                        /*Visibility(
-              visible: !stopflag,
-              child: FloatingActionButton(
-                onPressed: (){
-                  Navigator.push(
-                      context, MaterialPageRoute(
-                      builder: (context) => const RoulettePage()));
-                },
-                child: const Text('ルーレットへ'),
-              ),
-            ),*/
                         Visibility(
                           visible: isVisible,
                           child: FloatingActionButton(
@@ -156,16 +137,6 @@ class _StartPageState extends State<StartPage> {
 
   void toggleFlag(){
     stopflag = !stopflag;
-  }
-
-  void toggleloadFlag(){
-    loadflag = !loadflag;
-  }
-
-  void checkload(bool bool){
-    if(loadflag){
-      bool = false;
-    }
   }
 
   void change(int tmp){
