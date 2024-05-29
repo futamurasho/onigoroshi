@@ -9,11 +9,6 @@ class CountPage extends StatefulWidget {
 
 class _CountPageState extends State<CountPage> {
   int _counter = 10;//初期値
-  final Future<String> _calculation = Future<String>.delayed(
-    const Duration(seconds: 2),
-        () => 'Data Loaded',
-  );
-
   @override
   void initState() {
     super.initState();
@@ -35,22 +30,36 @@ class _CountPageState extends State<CountPage> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('ストップ！！！'),
-      ),
-      body: Center(
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('images/background_1.png'),
+            fit: BoxFit.fill
+            )
+        ),
+        child:Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
               'コップをコースターにおいてください！！！',
+              style: TextStyle(
+                  fontFamily:'Yuji',
+                  fontSize: 15,
+                  color: Colors.black
+                  )
             ),
             Text(
               '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+              style: TextStyle(
+                  fontFamily:'Yuji',
+                  fontSize: 40,
+                  color: Colors.black
+                  )
             ),
           ],
         ),
+      ),
       ),
     );
   }

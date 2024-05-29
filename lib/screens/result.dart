@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:onigoroshi_demo/screens/roulette_page.dart';
 import 'dart:async';
-import 'package:onigoroshi_demo/roulette_page.dart';
-import 'dart:math';
-import '../count_page.dart';
 //タイマーがランダムに止まる
 class ResultPage extends StatefulWidget {
   const ResultPage({super.key});
@@ -12,11 +10,11 @@ class ResultPage extends StatefulWidget {
 
 class _ResultPageState extends State<ResultPage> {
   bool isVisible = true;//可視化のbool値
-  int _counter = 0;//初期値
+  //int _counter = 0;//初期値
   bool stopflag = true;
-  Timer? _timer;
-  DateTime? _time;
-  late final int _stopcounter;//ここを乱数にする
+  //Timer? _timer;
+  //DateTime? _time;
+  //late final int _stopcounter;//ここを乱数にする
   //重さの計測する関数が必要
   final Future<String> _calculation = Future<String>.delayed(
     const Duration(seconds: 2),
@@ -25,7 +23,7 @@ class _ResultPageState extends State<ResultPage> {
 
   @override
   void initState(){
-    _time=DateTime.utc(0,0,0);
+    //_time=DateTime.utc(0,0,0);
     super.initState();
   }
 
@@ -33,14 +31,26 @@ class _ResultPageState extends State<ResultPage> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      body:FutureBuilder<String>(
+      body:Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('images/background_1.png'),
+            fit: BoxFit.fill
+            )
+        ),
+        child: FutureBuilder<String>(
         future: _calculation,
         builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
           List<Widget> children;
           if (snapshot.hasData) { // 値が存在する場合の処理
             children = <Widget>[
               const Text(
-                  '敗者は~さんでした！'
+                  '敗者は~さんでした！',
+                  style: TextStyle(
+                                fontFamily:'Yuji',
+                                fontSize: 30,
+                                color: Colors.black
+                                )
               ),
               FloatingActionButton(
                   onPressed: (){
@@ -84,18 +94,9 @@ class _ResultPageState extends State<ResultPage> {
           );
         },
       ),
-    );
+      ),
+   );
   }
 
-  void toggleShow(){
-    isVisible = !isVisible;
-  }
-
-  void toggleFlag(){
-    stopflag = !stopflag;
-  }
-
-  void change(int tmp){
-    _stopcounter = Random().nextInt(60*tmp-20*tmp+1)+20*tmp;
-  }
+  
 }

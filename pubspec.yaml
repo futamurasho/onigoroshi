@@ -41,6 +41,8 @@ dependencies:
   cupertino_icons: ^1.0.6
   font_awesome_flutter: ^10.7.0
   flutter_blue_plus: ^1.32.7
+  wheel_slider: ^1.2.1
+  animated_text_kit: ^4.2.2
 
 dev_dependencies:
   flutter_test:
@@ -58,6 +60,8 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  assets:
+   - images/
   fonts:
   - family: Yuji
     fonts:

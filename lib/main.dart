@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'widgets/bluetooth_on_tile.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 
 void main() {
   FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true);
@@ -21,6 +22,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'test'),//test代入
+      navigatorObservers: [BluetoothAdapterStateObserver()],
     );
   }
 }
@@ -39,35 +41,60 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
 
     return Scaffold(//アプリケーションの基本的なレイアウトを提供するウィジェット
-      body: Center(
-        child:  Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-                '鬼殺し',
-                style:TextStyle(
+      body: 
+      Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('images/background_main.png'),
+            fit: BoxFit.cover
+            )
+        ),
+        child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        child: Center(
+          child:  
+          Column(
+            children: <Widget>[
+              Container(
+                height: 200,
+                margin: EdgeInsets.only(top:100.0),
+                child: const Text(
+                  '鬼殺し',
+                  style:TextStyle(
                   fontFamily:'Yuji',
                   fontSize: 50,
-                )
-            ),
-            TextButton(
-                onPressed: (){
-                Navigator.push(
+                  )
+                  ),
+              ),
+              Container(
+                height: 200,
+              ),
+              Container(
+                height: 50,
+                child: AnimatedTextKit(
+                  animatedTexts: [
+                    FadeAnimatedText(
+                      '画面をタップ',
+                      textStyle: TextStyle(
+                        fontFamily:'Yuji',
+                        fontSize: 40,
+                        )
+                        )
+                  ],
+                  repeatForever: true,
+                ),
+              )
+          ]
+        ),
+      ),
+      onTap: (){
+      Navigator.push(
                   context, 
                   MaterialPageRoute(
                     builder: (context) => BluetoothOnTile(),
                   ));
-                },
-                child: const Text(
-                  '始める',
-                  style: TextStyle(
-                    fontFamily: 'Yuji',
-                    fontSize: 30,
-                  ),
-                ),
-            ),
-          ]
-        ),
+      },
+    ),
       ),
     );
   }
