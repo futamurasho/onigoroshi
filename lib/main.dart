@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:onigoroshi_demo/select_page.dart';
+import 'package:onigoroshi_demo/screens/select_page.dart';
+import 'widgets/bluetooth_on_tile.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
-
-import 'start_page.dart';
+import 'screens/start_page.dart';
 
 void main() {
+  FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true);
   runApp(const MyApp());
 }
 
@@ -16,7 +18,7 @@ class MyApp extends StatelessWidget {
   @override//メソッドの上書き
   Widget build(BuildContext context) {
     return MaterialApp(//アプリ全体で共通のテーマやナビゲーション、ローカリゼーションなどの設定
-      title: 'Flutter Demo',
+      title: 'Onigoroshi',
       theme: ThemeData(
 
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -61,15 +63,17 @@ class _MyHomePageState extends State<MyHomePage> {
             TextButton(
                 onPressed: (){
                 Navigator.push(
-                context, MaterialPageRoute(
-                builder: (context) => const SelectPage()));
+                  context, 
+                  MaterialPageRoute(
+                    builder: (context) => BluetoothOnTile(),
+                  ));
                 },
-                child: Text(
-                    '始める',
-                    style: TextStyle(
-                      fontFamily:'Yuji',
-                      fontSize: 30,
-                    )
+                child: const Text(
+                  '始める',
+                  style: TextStyle(
+                    fontFamily: 'Yuji',
+                    fontSize: 30,
+                  ),
                 ),
             ),
           ]

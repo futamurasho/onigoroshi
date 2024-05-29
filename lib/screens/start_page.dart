@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
 import 'dart:math';
-import 'package:onigoroshi_demo/roulette_page.dart';
+import 'package:onigoroshi_demo/screens/roulette_page.dart';
 import 'count_page.dart';
 //タイマーがランダムに止まる
 class StartPage extends StatefulWidget {
