@@ -1,10 +1,13 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import '../utils/snackbar.dart';
 import '../widgets/scan_result_tile.dart';
+import 'select_page.dart';
 
 
 class ScanScreen extends StatefulWidget {
@@ -120,24 +123,76 @@ class _ScanScreenState extends State<ScanScreen> {
         .toList();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return ScaffoldMessenger(
-      key: Snackbar.snackBarKeyB,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('コースタを探す'),
-        ),
-        body: RefreshIndicator(
-          onRefresh: onRefresh,
-          child: ListView(
-            children: <Widget>[
-              ..._buildScanResultTiles(context),
-            ],
+@override
+Widget build(BuildContext context) {
+  return ScaffoldMessenger(
+    key: Snackbar.snackBarKeyB,
+    child: Scaffold(
+      appBar: AppBar(
+        title: const Text('コースタを探す'),
+        leadingWidth: 85,
+        leading: TextButton(
+          child: const Text(
+            '戻る',
+            style: TextStyle(
+              fontFamily:'Yuji',
+              fontSize:20,
+              ),
           ),
-        ),
-        floatingActionButton: buildScanButton(context),
+          onPressed: () => Navigator.of(context).pop()  // エラー
+          ),
       ),
-    );
-  }
+      body: Column(
+        children: [
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: onRefresh,
+              child: ListView(
+                children: <Widget>[
+                  ..._buildScanResultTiles(context),
+                ],
+              ),
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.all(15),
+            margin: EdgeInsets.only(bottom: 50),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton(
+                  child: const Text("SCAN"), 
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.purple,
+                    foregroundColor: Colors.white,
+                    fixedSize: Size(150, 40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: onScanPressed,
+                ),
+                SizedBox(height: 15),
+                ElevatedButton(
+                  child: const Text('ゲーム設定へ'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey,
+                    foregroundColor: Colors.white,
+                    fixedSize: Size(150, 40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const SelectPage()));
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
 }

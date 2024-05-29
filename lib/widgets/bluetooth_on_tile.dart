@@ -47,7 +47,6 @@ class _BluetoothOnTileState extends State<BluetoothOnTile> {
         : BluetoothOffScreen(adapterState: _adapterState);
     debugPrint('BluetoothOnTile: $_adapterState');
     return MaterialApp(
-      color: Colors.lightBlue,
       home: screen,
       navigatorObservers: [BluetoothAdapterStateObserver()],
     );
