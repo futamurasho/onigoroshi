@@ -131,18 +131,22 @@ Widget build(BuildContext context) {
       appBar: AppBar(
         title: const Text('コースタを探す'),
         leadingWidth: 85,
-        leading: TextButton(
-          child: const Text(
-            '戻る',
-            style: TextStyle(
-              fontFamily:'Yuji',
-              fontSize:20,
-              ),
-          ),
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+          iconSize: 40.0,
+          icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop()  // エラー
           ),
       ),
-      body: Column(
+      extendBodyBehindAppBar: true,
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('images/background_1.png'),
+            fit: BoxFit.fill
+            )
+        ),
+        child: Column(
         children: [
           Expanded(
             child: RefreshIndicator(
@@ -191,6 +195,7 @@ Widget build(BuildContext context) {
             ),
           ),
         ],
+      ),
       ),
     ),
   );

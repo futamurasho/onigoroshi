@@ -31,10 +31,13 @@ class _RoulettePageState extends State<RoulettePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('ルーレット'),
-      ),
       body:Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('images/background_1.png'),
+            fit: BoxFit.fill
+            )
+        ),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -76,7 +79,8 @@ class _RoulettePageState extends State<RoulettePage>
                     ),
                   ),
                   const Icon(
-                    FontAwesomeIcons.longArrowAltDown,
+                    //FontAwesomeIcons.longArrowAltDown,
+                    FontAwesomeIcons.downLong,
                     size: 45,
                     color: Colors.grey,
                   ),

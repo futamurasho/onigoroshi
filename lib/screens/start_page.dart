@@ -2,19 +2,17 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
 import 'dart:math';
-import 'package:onigoroshi_demo/screens/roulette_page.dart';
 import 'count_page.dart';
 //タイマーがランダムに止まる
 class StartPage extends StatefulWidget {
-  final minutes;
-  const StartPage(this.minutes,{super.key});
+  final _nCurrentValue;
+  const StartPage(this._nCurrentValue,{super.key});
   @override
   State<StartPage> createState() => _StartPageState();
 }
 
 class _StartPageState extends State<StartPage> {
   bool isVisible = true;//可視化のbool値
-  bool loadflag = false;
   int _counter = 0;//初期値
   bool stopflag = true;
   Timer? _timer;
@@ -34,31 +32,32 @@ class _StartPageState extends State<StartPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
+        //カウント始めた後に、戻るボタンを押すとエラー
         leadingWidth: 85,
-        leading: TextButton(
-            child: const Text(
-              '戻る',
-              style: TextStyle(
-                fontFamily:'Yuji',
-                fontSize:20,
-              ),
-            ),
-            onPressed: () => Navigator.of(context).pop()
-        ),
+        leading: IconButton(
+                    iconSize: 40.0,
+                  icon: Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.of(context).pop()
+                  ),
+        backgroundColor: Colors.transparent,
       ),
-      body:FutureBuilder<String>(
+      extendBodyBehindAppBar: true,
+      body:Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('images/background_1.png'),
+            fit: BoxFit.fill
+            )
+        ),
+        child: FutureBuilder<String>(
             future: _calculation,
             builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
               List<Widget> children;
               if (snapshot.hasData) { // 値が存在する場合の処理
                 children = <Widget>[
-                  Center(
-
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                Column(
                       children: <Widget>[
                         Text(
                           DateFormat.Hms().format(_time!),
@@ -66,22 +65,18 @@ class _StartPageState extends State<StartPage> {
                         ),
                         Visibility(
                           visible: !isVisible && stopflag,
-                          child: const Text('飲め！！'),
+                          child: const Text(
+                            '飲め！！',
+                            style: TextStyle(
+                                fontFamily:'Yuji',
+                                fontSize: 50,
+                                color: Colors.black
+                                )
+                          ),
                         ),
-                        /*Visibility(
-              visible: !stopflag,
-              child: FloatingActionButton(
-                onPressed: (){
-                  Navigator.push(
-                      context, MaterialPageRoute(
-                      builder: (context) => const RoulettePage()));
-                },
-                child: const Text('ルーレットへ'),
-              ),
-            ),*/
                         Visibility(
                           visible: isVisible,
-                          child: FloatingActionButton(
+                          child: TextButton(
                             onPressed: (){//start押された時の処理
                               setState(toggleShow);
                               _timer = Timer.periodic(
@@ -90,7 +85,7 @@ class _StartPageState extends State<StartPage> {
                                   setState(() {
                                     _counter++;
                                     if(_counter == 1){
-                                      change(widget.minutes);
+                                      change(widget._nCurrentValue);
                                       _time = _time?.add(Duration(seconds: 1));
                                     }
                                     else if(_counter == _stopcounter){
@@ -107,12 +102,19 @@ class _StartPageState extends State<StartPage> {
                                 },
                               );
                             },
-                            child: const Text('始める'),
+                            child: const Text(
+                              '始める',
+                              style: TextStyle(
+                                fontFamily:'Yuji',
+                                fontSize: 50,
+                                color: Colors.black
+                                )
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  ),
+                  
                 ];
               } else if (snapshot.hasError) {// エラーが発生した場合の処理
                 children = <Widget>[
@@ -147,6 +149,7 @@ class _StartPageState extends State<StartPage> {
               );
             },
         ),
+      ),
     );
   }
 
@@ -156,16 +159,6 @@ class _StartPageState extends State<StartPage> {
 
   void toggleFlag(){
     stopflag = !stopflag;
-  }
-
-  void toggleloadFlag(){
-    loadflag = !loadflag;
-  }
-
-  void checkload(bool bool){
-    if(loadflag){
-      bool = false;
-    }
   }
 
   void change(int tmp){
