@@ -2,27 +2,55 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
 import 'dart:math';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'count_page.dart';
-//タイマーがランダムに止まる
-class StartPage extends StatefulWidget {
+import 'scan_screen.dart';
+import '../utils/weightRead.dart';
+
+
+
+// task : weightのデータ構造
+class WeightModel {
+  final String main;
+  final String description;
+  final String icon;
+
+  WeightModel({
+    required this.main,
+    required this.description,
+    required this.icon
+  });
+
+  factory WeightModel.fromJson(Map<String, dynamic> json) {
+    var weather = json['weather'];
+    var data = weather[0];
+
+    var model = WeightModel(
+        main: data['main'],
+        description: data['description'],
+        icon: data['icon']
+    );
+
+    return model;
+  }
+}
+
+class StartPage extends ConsumerStatefulWidget {
   final _nCurrentValue;
   const StartPage(this._nCurrentValue,{super.key});
   @override
-  State<StartPage> createState() => _StartPageState();
+  ConsumerState<StartPage> createState() => _StartPageState();
 }
 
-class _StartPageState extends State<StartPage> {
+class _StartPageState extends ConsumerState<StartPage> {
   bool isVisible = true;//可視化のbool値
   int _counter = 0;//初期値
   bool stopflag = true;
   Timer? _timer;
   DateTime? _time;
   late final int _stopcounter;//ここを乱数にする
-  //重さの計測する関数が必要
-  final Future<String> _calculation = Future<String>.delayed(
-    const Duration(seconds: 2),
-        () => 'Data Loaded',
-  );
+
 
   @override
   void initState(){
@@ -32,6 +60,7 @@ class _StartPageState extends State<StartPage> {
 
   @override
   Widget build(BuildContext context) {
+    final connectedDevices = ref.watch(connectedDevicesProvider);
     return Scaffold(
       appBar: AppBar(
         //カウント始めた後に、戻るボタンを押すとエラー
@@ -52,7 +81,7 @@ class _StartPageState extends State<StartPage> {
             )
         ),
         child: FutureBuilder<String>(
-            future: _calculation,
+            future: WeightRead(connectedDevices),
             builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
               List<Widget> children;
               if (snapshot.hasData) { // 値が存在する場合の処理

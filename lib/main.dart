@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'widgets/bluetooth_on_tile.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
   FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true);
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
