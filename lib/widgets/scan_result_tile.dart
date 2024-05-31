@@ -9,7 +9,7 @@ class ScanResultTile extends StatefulWidget {
   const ScanResultTile({Key? key, required this.result, this.updateConnectCount}) : super(key: key);
 
   final ScanResult result;
-  final Function(bool increment)? updateConnectCount;
+  final Function(BluetoothDevice device, bool increment)? updateConnectCount;
 
   @override
   State<ScanResultTile> createState() => _ScanResultTileState();
@@ -44,7 +44,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
         if (mounted) {
           setState(() {
             _connectionState = BluetoothConnectionState.connected;
-            widget.updateConnectCount?.call(true);
+            widget.updateConnectCount?.call(device,true);
           });
         }
       }).catchError((e) {
@@ -55,7 +55,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
         if (mounted) {
           setState(() {
             _connectionState = BluetoothConnectionState.disconnected;
-            widget.updateConnectCount?.call(false);
+            widget.updateConnectCount?.call(device,false);
           });
         }
       }).catchError((e) {

@@ -2,32 +2,62 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
 import 'dart:math';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'count_page.dart';
-//タイマーがランダムに止まる
-class StartPage extends StatefulWidget {
+import 'scan_screen.dart';
+import '../utils/weight.dart';
+
+
+
+// task : weightのデータ構造
+class WeightModel {
+  final String main;
+  final String description;
+  final String icon;
+
+  WeightModel({
+    required this.main,
+    required this.description,
+    required this.icon
+  });
+
+  factory WeightModel.fromJson(Map<String, dynamic> json) {
+    var weather = json['weather'];
+    var data = weather[0];
+
+    var model = WeightModel(
+        main: data['main'],
+        description: data['description'],
+        icon: data['icon']
+    );
+
+    return model;
+  }
+}
+
+class StartPage extends ConsumerStatefulWidget {
   final _nCurrentValue;
   const StartPage(this._nCurrentValue,{super.key});
   @override
-  State<StartPage> createState() => _StartPageState();
+  ConsumerState<StartPage> createState() => _StartPageState();
 }
 
-class _StartPageState extends State<StartPage> {
+class _StartPageState extends ConsumerState<StartPage> {
   bool isVisible = true;//可視化のbool値
   int _counter = 0;//初期値
   bool stopflag = true;
   Timer? _timer;
   DateTime? _time;
   late final int _stopcounter;//ここを乱数にする
-  //重さの計測する関数が必要
-  final Future<String> _calculation = Future<String>.delayed(
-    const Duration(seconds: 2),
-        () => 'Data Loaded',
-  );
+  late Future<String> _weightReadFuture;
+
 
   @override
   void initState(){
     _time=DateTime.utc(0,0,0);
     super.initState();
+    _weightReadFuture = WeightRead(ref.read(connectedDevicesProvider));
   }
 
   @override
@@ -51,107 +81,110 @@ class _StartPageState extends State<StartPage> {
             fit: BoxFit.fill
             )
         ),
-        child: FutureBuilder<String>(
-            future: _calculation,
-            builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-              List<Widget> children;
-              if (snapshot.hasData) { // 値が存在する場合の処理
-                children = <Widget>[
-                Column(
-                      children: <Widget>[
-                        Text(
-                          DateFormat.Hms().format(_time!),
-                          style: Theme.of(context).textTheme.headlineMedium,
-                        ),
-                        Visibility(
-                          visible: !isVisible && stopflag,
-                          child: const Text(
-                            '飲め！！',
-                            style: TextStyle(
-                                fontFamily:'Yuji',
-                                fontSize: 50,
-                                color: Colors.black
-                                )
+        child: 
+          Consumer(builder: (context, ref, child) {
+            return FutureBuilder<String>(
+              future: _weightReadFuture,
+              builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+                List<Widget> children;
+                if (snapshot.hasData) { // 値が存在する場合の処理
+                  children = <Widget>[
+                  Column(
+                        children: <Widget>[
+                          Text(
+                            DateFormat.Hms().format(_time!),
+                            style: Theme.of(context).textTheme.headlineMedium,
                           ),
-                        ),
-                        Visibility(
-                          visible: isVisible,
-                          child: TextButton(
-                            onPressed: (){//start押された時の処理
-                              setState(toggleShow);
-                              _timer = Timer.periodic(
-                                const Duration(seconds: 1),
-                                    (Timer timer){
-                                  setState(() {
-                                    _counter++;
-                                    if(_counter == 1){
-                                      change(widget._nCurrentValue);
-                                      _time = _time?.add(Duration(seconds: 1));
-                                    }
-                                    else if(_counter == _stopcounter){
-                                      _timer!.cancel();
-                                      toggleFlag();
-                                      Navigator.push(
-                                          context, MaterialPageRoute(
-                                          builder: (context) => const CountPage()));
-                                    }
-                                    else{
-                                      _time = _time?.add(Duration(seconds: 1));
-                                    }
-                                  });
-                                },
-                              );
-                            },
+                          Visibility(
+                            visible: !isVisible && stopflag,
                             child: const Text(
-                              '始める',
+                              '飲め！！',
                               style: TextStyle(
-                                fontFamily:'Yuji',
-                                fontSize: 50,
-                                color: Colors.black
-                                )
+                                  fontFamily:'Yuji',
+                                  fontSize: 50,
+                                  color: Colors.black
+                                  )
                             ),
                           ),
-                        ),
-                      ],
+                          Visibility(
+                            visible: isVisible,
+                            child: TextButton(
+                              onPressed: (){//start押された時の処理
+                                setState(toggleShow);
+                                _timer = Timer.periodic(
+                                  const Duration(seconds: 1),
+                                      (Timer timer){
+                                    setState(() {
+                                      _counter++;
+                                      if(_counter == 1){
+                                        change(widget._nCurrentValue);
+                                        _time = _time?.add(Duration(seconds: 1));
+                                      }
+                                      else if(_counter == _stopcounter){
+                                        _timer!.cancel();
+                                        toggleFlag();
+                                        Navigator.push(
+                                            context, MaterialPageRoute(
+                                            builder: (context) => const CountPage()));
+                                      }
+                                      else{
+                                        _time = _time?.add(Duration(seconds: 1));
+                                      }
+                                    });
+                                  },
+                                );
+                              },
+                              child: const Text(
+                                '始める',
+                                style: TextStyle(
+                                  fontFamily:'Yuji',
+                                  fontSize: 50,
+                                  color: Colors.black
+                                  )
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    
+                  ];
+                } else if (snapshot.hasError) {// エラーが発生した場合の処理
+                  children = <Widget>[
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 60,
                     ),
-                  
-                ];
-              } else if (snapshot.hasError) {// エラーが発生した場合の処理
-                children = <Widget>[
-                  const Icon(
-                    Icons.error_outline,
-                    color: Colors.red,
-                    size: 60,
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: Text('Error: ${snapshot.error}'),
+                    ),
+                  ];
+                } else { // 値が存在しない場合の処理
+                  children = const <Widget>[
+                    SizedBox(
+                      width: 60,
+                      height: 60,
+                      child: CircularProgressIndicator(),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 16),
+                      child: Text('計測中'),
+                    ),
+                  ];
+                }
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: children,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Text('Error: ${snapshot.error}'),
-                  ),
-                ];
-              } else { // 値が存在しない場合の処理
-                children = const <Widget>[
-                  SizedBox(
-                    width: 60,
-                    height: 60,
-                    child: CircularProgressIndicator(),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 16),
-                    child: Text('計測中'),
-                  ),
-                ];
-              }
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: children,
-                ),
-              );
-            },
+                );
+              },
+            );
+          },)
         ),
-      ),
-    );
-  }
+        );
+      }
 
   void toggleShow(){
     isVisible = !isVisible;

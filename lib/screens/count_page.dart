@@ -8,7 +8,7 @@ class CountPage extends StatefulWidget {
 }
 
 class _CountPageState extends State<CountPage> {
-  int _counter = 10;//初期値
+  int _counter = 3;//初期値
   @override
   void initState() {
     super.initState();

@@ -1,30 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onigoroshi_demo/screens/roulette_page.dart';
-import 'dart:async';
+import 'scan_screen.dart';
+import '../utils/weight.dart';
+
+
 //タイマーがランダムに止まる
-class ResultPage extends StatefulWidget {
+class ResultPage extends ConsumerStatefulWidget {
   const ResultPage({super.key});
   @override
-  State<ResultPage> createState() => _ResultPageState();
+  ConsumerState<ResultPage> createState() => _ResultPageState();
 }
 
-class _ResultPageState extends State<ResultPage> {
+class _ResultPageState extends ConsumerState<ResultPage> {
   bool isVisible = true;//可視化のbool値
   //int _counter = 0;//初期値
   bool stopflag = true;
+  late Future<String> _weightReadFuture;
   //Timer? _timer;
   //DateTime? _time;
   //late final int _stopcounter;//ここを乱数にする
-  //重さの計測する関数が必要
-  final Future<String> _calculation = Future<String>.delayed(
-    const Duration(seconds: 2),
-        () => 'Data Loaded',
-  );
 
   @override
   void initState(){
     //_time=DateTime.utc(0,0,0);
     super.initState();
+    _weightReadFuture = WeightRead(ref.read(connectedDevicesProvider));
   }
 
   @override
@@ -39,7 +40,7 @@ class _ResultPageState extends State<ResultPage> {
             )
         ),
         child: FutureBuilder<String>(
-        future: _calculation,
+        future: _weightReadFuture,
         builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
           List<Widget> children;
           if (snapshot.hasData) { // 値が存在する場合の処理
