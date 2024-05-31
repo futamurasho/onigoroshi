@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onigoroshi_demo/screens/roulette_page.dart';
 import 'scan_screen.dart';
-import '../utils/weightRead.dart';
+import '../utils/weight.dart';
+
 
 //タイマーがランダムに止まる
 class ResultPage extends ConsumerStatefulWidget {
@@ -15,6 +16,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
   bool isVisible = true;//可視化のbool値
   //int _counter = 0;//初期値
   bool stopflag = true;
+  late Future<String> _weightReadFuture;
   //Timer? _timer;
   //DateTime? _time;
   //late final int _stopcounter;//ここを乱数にする
@@ -23,11 +25,11 @@ class _ResultPageState extends ConsumerState<ResultPage> {
   void initState(){
     //_time=DateTime.utc(0,0,0);
     super.initState();
+    _weightReadFuture = WeightRead(ref.read(connectedDevicesProvider));
   }
 
   @override
   Widget build(BuildContext context) {
-    final connectedDevices = ref.watch(connectedDevicesProvider);
 
     return Scaffold(
       body:Container(
@@ -38,7 +40,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
             )
         ),
         child: FutureBuilder<String>(
-        future: WeightRead(connectedDevices),
+        future: _weightReadFuture,
         builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
           List<Widget> children;
           if (snapshot.hasData) { // 値が存在する場合の処理
