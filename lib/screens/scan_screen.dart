@@ -13,6 +13,9 @@ class ConnectedDevicesNotifier extends StateNotifier<List<BluetoothDevice>> {
   void addDevice(BluetoothDevice device) {
     state = [...state, device];
   }
+  void removeDevice(BluetoothDevice device) {
+    state = state.where((d) => d.remoteId != device.remoteId).toList();
+  }
 }
 
 final connectedDevicesProvider = StateNotifierProvider<ConnectedDevicesNotifier, List<BluetoothDevice>>((ref) {
@@ -73,16 +76,26 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     debugPrint("updateConnectCount: $increment");
     setState(() {
       _connectCount += increment ? 1 : -1;
-      ref.read(connectedDevicesProvider.notifier).addDevice(device);
+      if (increment) {
+        ref.read(connectedDevicesProvider.notifier).addDevice(device);
+      } else {
+        ref.read(connectedDevicesProvider.notifier).removeDevice(device);
+      }
     });
     Snackbar.show(ABC.b, "現在 ${_connectCount}個接続しています", success: true);
+    debugPrint("Connected Devices: ${ref.read(connectedDevicesProvider)}");
   }
 
-  // ゲーム設定ボタンが押されたときの処理（デバッグ用）
+  // ゲーム設定ボタンが押されたときの処理
   void onGameSettingPressed() {
     debugPrint("onGameSettingPressed");
     final connectedDevices = ref.read(connectedDevicesProvider);
-    for (BluetoothDevice device in connectedDevices) {
+    if (connectedDevices.isEmpty) {
+      Snackbar.show(ABC.b, "デバイスが接続されていません", success: false);
+      return;
+    }
+    else{
+      for (BluetoothDevice device in connectedDevices) {
       debugPrint('Device name: ${device.platformName}');
       device.discoverServices().then((services) {
         for (BluetoothService service in services) {
@@ -91,9 +104,15 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
           for (BluetoothCharacteristic characteristic in service.characteristics) {
             debugPrint('Characteristic UUID: ${characteristic.uuid}');
             debugPrint('Characteristic properties: ${characteristic.properties}');
+            }
           }
-        }
-      });
+        }).catchError((e) {
+          Snackbar.show(ABC.b, prettyException("Discover Services Error:", e), success: false);
+          return;
+        });
+      }
+      onStopPressed();
+      Navigator.push(context, MaterialPageRoute(builder: (_) => const SelectPage()));
     }
   }
 
@@ -224,7 +243,6 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                       ),
                       onPressed: () {
                         onGameSettingPressed();
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const SelectPage()));
                       },
                     ),
                   ],
