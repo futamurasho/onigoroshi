@@ -59,10 +59,10 @@ Future<String>WeightRead(int readCount,List<BluetoothDevice> connectedDevices) a
 }
 
 
-Future<String> writeToOne(String deviceID, List<BluetoothDevice> connectedDevices) async {
+Future<String> writeToMinDevice(String deviceID, List<BluetoothDevice> connectedDevices) async {
 
-  BluetoothDevice device = connectedDevices.firstWhere((d) => d.remoteId == deviceID);
-
+  BluetoothDevice device = connectedDevices.firstWhere((d) => d.remoteId.toString() == deviceID);
+  
   List<BluetoothService> services = await device.discoverServices();
   for (BluetoothService service in services) {
     var characteristics = service.characteristics;
@@ -118,7 +118,7 @@ Future<String> getMinWeightDevice(List<BluetoothDevice> connectedDevices) async 
 
   debugPrint('最小差分デバイス: $minDifferenceDevice, 差分: $minDifference');
 
-  await writeToOne(minDifferenceDevice, connectedDevices);
+  await writeToMinDevice(minDifferenceDevice, connectedDevices);
 
   return minDifferenceDevice;
 }
