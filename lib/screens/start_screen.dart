@@ -4,37 +4,10 @@ import 'package:intl/intl.dart';
 import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'count_page.dart';
+import 'count_screen.dart';
 import 'scan_screen.dart';
 import '../utils/weight.dart';
 
-
-
-// task : weightのデータ構造
-class WeightModel {
-  final String main;
-  final String description;
-  final String icon;
-
-  WeightModel({
-    required this.main,
-    required this.description,
-    required this.icon
-  });
-
-  factory WeightModel.fromJson(Map<String, dynamic> json) {
-    var weather = json['weather'];
-    var data = weather[0];
-
-    var model = WeightModel(
-        main: data['main'],
-        description: data['description'],
-        icon: data['icon']
-    );
-
-    return model;
-  }
-}
 
 class StartPage extends ConsumerStatefulWidget {
   final _nCurrentValue;
@@ -57,7 +30,7 @@ class _StartPageState extends ConsumerState<StartPage> {
   void initState(){
     _time=DateTime.utc(0,0,0);
     super.initState();
-    _weightReadFuture = WeightRead(ref.read(connectedDevicesProvider));
+    _weightReadFuture = WeightRead(0,ref.read(connectedDevicesProvider));
   }
 
   @override
@@ -195,6 +168,7 @@ class _StartPageState extends ConsumerState<StartPage> {
   }
 
   void change(int tmp){
-    _stopcounter = Random().nextInt(60*tmp-20*tmp+1)+20*tmp;
+    _stopcounter = 3;
+    // _stopcounter = Random().nextInt(60*tmp-20*tmp+1)+20*tmp;
   }
   }

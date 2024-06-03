@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:onigoroshi_demo/screens/result.dart';
+import 'package:onigoroshi_demo/screens/result_screen.dart';
 class CountPage extends StatefulWidget {
   const CountPage({super.key});
   @override
