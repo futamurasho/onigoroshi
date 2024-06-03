@@ -16,7 +16,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
   bool isVisible = true;//可視化のbool値
   //int _counter = 0;//初期値
   bool stopflag = true;
-  late Future<String> _weightReadFuture;
+  late Future<String> _minweightdevice;
   //Timer? _timer;
   //DateTime? _time;
   //late final int _stopcounter;//ここを乱数にする
@@ -25,7 +25,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
   void initState(){
     //_time=DateTime.utc(0,0,0);
     super.initState();
-    _weightReadFuture = WeightRead(ref.read(connectedDevicesProvider));
+    _minweightdevice = getMinWeightDevice(ref.read(connectedDevicesProvider));
   }
 
   @override
@@ -40,13 +40,13 @@ class _ResultPageState extends ConsumerState<ResultPage> {
             )
         ),
         child: FutureBuilder<String>(
-        future: _weightReadFuture,
+        future: _minweightdevice,
         builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
           List<Widget> children;
           if (snapshot.hasData) { // 値が存在する場合の処理
             children = <Widget>[
-              const Text(
-                  '敗者は~さんでした！',
+               Text(
+                  'この期間一番飲んでいなかった人は${snapshot.data}でした！',
                   style: TextStyle(
                                 fontFamily:'Yuji',
                                 fontSize: 30,

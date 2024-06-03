@@ -9,33 +9,6 @@ import 'scan_screen.dart';
 import '../utils/weight.dart';
 
 
-
-// task : weightのデータ構造
-class WeightModel {
-  final String main;
-  final String description;
-  final String icon;
-
-  WeightModel({
-    required this.main,
-    required this.description,
-    required this.icon
-  });
-
-  factory WeightModel.fromJson(Map<String, dynamic> json) {
-    var weather = json['weather'];
-    var data = weather[0];
-
-    var model = WeightModel(
-        main: data['main'],
-        description: data['description'],
-        icon: data['icon']
-    );
-
-    return model;
-  }
-}
-
 class StartPage extends ConsumerStatefulWidget {
   final _nCurrentValue;
   const StartPage(this._nCurrentValue,{super.key});
@@ -57,7 +30,7 @@ class _StartPageState extends ConsumerState<StartPage> {
   void initState(){
     _time=DateTime.utc(0,0,0);
     super.initState();
-    _weightReadFuture = WeightRead(ref.read(connectedDevicesProvider));
+    _weightReadFuture = WeightRead(0,ref.read(connectedDevicesProvider));
   }
 
   @override
