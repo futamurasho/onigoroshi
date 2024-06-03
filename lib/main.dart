@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:onigoroshi_demo/screens/select_page.dart';
+import 'package:onigoroshi_demo/screens/select_screen.dart';
 import 'widgets/bluetooth_on_tile.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
