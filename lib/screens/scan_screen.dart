@@ -5,7 +5,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/snackbar.dart';
 import '../widgets/scan_result_tile.dart';
-import 'select_page.dart';
+import 'select_screen.dart';
 
 class ConnectedDevicesNotifier extends StateNotifier<List<BluetoothDevice>> {
   ConnectedDevicesNotifier() : super(<BluetoothDevice>[]);

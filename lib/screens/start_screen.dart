@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'count_page.dart';
+import 'count_screen.dart';
 import 'scan_screen.dart';
 import '../utils/weight.dart';
 
@@ -168,6 +168,7 @@ class _StartPageState extends ConsumerState<StartPage> {
   }
 
   void change(int tmp){
-    _stopcounter = Random().nextInt(60*tmp-20*tmp+1)+20*tmp;
+    _stopcounter = 3;
+    // _stopcounter = Random().nextInt(60*tmp-20*tmp+1)+20*tmp;
   }
   }

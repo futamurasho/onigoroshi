@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wheel_slider/wheel_slider.dart';
 
-import 'start_page.dart';
+import 'start_screen.dart';
 class SelectPage extends StatefulWidget {
   const SelectPage({super.key});
   @override

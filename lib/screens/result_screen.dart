@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:onigoroshi_demo/screens/roulette_page.dart';
+import 'package:onigoroshi_demo/screens/roulette_screen.dart';
 import 'scan_screen.dart';
 import '../utils/weight.dart';
 
