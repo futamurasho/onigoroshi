@@ -188,19 +188,19 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         .toList();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return ScaffoldMessenger(
-      key: Snackbar.snackBarKeyB,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('コースタを探す'),
-          leadingWidth: 85,
-          backgroundColor: Colors.transparent,
-          leading: IconButton(
-            iconSize: 40.0,
-            icon: Icon(Icons.arrow_back),
-            onPressed: () => Navigator.of(context).pop(),
+@override
+Widget build(BuildContext context) {
+  return ScaffoldMessenger(
+    key: Snackbar.snackBarKeyB,
+    child: Scaffold(
+      appBar: AppBar(
+        title: const Text('コースタを探す'),
+        leadingWidth: 85,
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+          iconSize: 40.0,
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop()  
           ),
         ),
         extendBodyBehindAppBar: true,

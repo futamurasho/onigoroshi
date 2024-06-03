@@ -10,8 +10,15 @@ import '../utils/weight.dart';
 
 
 class StartPage extends ConsumerStatefulWidget {
-  final _nCurrentValue;
-  const StartPage(this._nCurrentValue,{super.key});
+  final int minutes;
+  final int music_id;
+  final List<dynamic> Punishment;
+  const StartPage({
+    super.key,
+    required this.minutes,
+    required this.music_id,
+    required this.Punishment,
+   });
   @override
   ConsumerState<StartPage> createState() => _StartPageState();
 }
@@ -36,17 +43,6 @@ class _StartPageState extends ConsumerState<StartPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        //カウント始めた後に、戻るボタンを押すとエラー
-        leadingWidth: 85,
-        leading: IconButton(
-                    iconSize: 40.0,
-                  icon: Icon(Icons.arrow_back),
-                  onPressed: () => Navigator.of(context).pop()
-                  ),
-        backgroundColor: Colors.transparent,
-      ),
-      extendBodyBehindAppBar: true,
       body:Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
@@ -81,7 +77,9 @@ class _StartPageState extends ConsumerState<StartPage> {
                           ),
                           Visibility(
                             visible: isVisible,
-                            child: TextButton(
+                            child: Column(
+                              children: <Widget>[
+                                TextButton(
                               onPressed: (){//start押された時の処理
                                 setState(toggleShow);
                                 _timer = Timer.periodic(
@@ -90,7 +88,7 @@ class _StartPageState extends ConsumerState<StartPage> {
                                     setState(() {
                                       _counter++;
                                       if(_counter == 1){
-                                        change(widget._nCurrentValue);
+                                        change(widget.minutes);
                                         _time = _time?.add(Duration(seconds: 1));
                                       }
                                       else if(_counter == _stopcounter){
@@ -116,6 +114,21 @@ class _StartPageState extends ConsumerState<StartPage> {
                                   )
                               ),
                             ),
+                            ElevatedButton(
+                              child: const Text('再設定'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.black,
+                                foregroundColor: Colors.white,
+                                fixedSize: Size(100, 40),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  ),
+                                  onPressed: () => Navigator.of(context).pop()
+                                  ),
+                            ],
+                            ),
+                          
                           ),
                         ],
                       ),
@@ -161,6 +174,10 @@ class _StartPageState extends ConsumerState<StartPage> {
 
   void toggleShow(){
     isVisible = !isVisible;
+  }
+
+  void delete(){
+
   }
 
   void toggleFlag(){
