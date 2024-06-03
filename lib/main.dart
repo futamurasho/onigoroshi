@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:onigoroshi_demo/screens/select_page.dart';
 import 'widgets/bluetooth_on_tile.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
@@ -47,7 +48,8 @@ class _MyHomePageState extends State<MyHomePage> {
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('images/background_main.png'),
-            fit: BoxFit.cover
+            fit: BoxFit.cover,
+            opacity: 0.7
             )
         ),
         child: GestureDetector(
@@ -89,10 +91,16 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       onTap: (){
-      Navigator.push(
+      /*Navigator.push(
                   context, 
                   MaterialPageRoute(
                     builder: (context) => BluetoothOnTile(),
+                  ));
+      },*/
+      Navigator.push(
+                  context, 
+                  MaterialPageRoute(
+                    builder: (context) => SelectPage(),
                   ));
       },
     ),
