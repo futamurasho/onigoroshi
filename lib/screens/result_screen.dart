@@ -71,7 +71,13 @@ class _ResultPageState extends ConsumerState<ResultPage> {
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 16),
-                child: Text('Error: ${snapshot.error}'),
+                child: Text('Error: ${snapshot.error}', 
+                    style: TextStyle(
+                                fontFamily:'Yuji',
+                                fontSize: 30,
+                                color: Colors.black
+                                )
+                ),
               ),
             ];
           } else { // 値が存在しない場合の処理

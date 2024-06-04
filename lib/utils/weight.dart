@@ -81,13 +81,13 @@ Future<String> getMinWeightDevice(List<BluetoothDevice> connectedDevices) async 
   await WeightRead(1,connectedDevices);
   debugPrint('weightData: $weightData');
 
-  if (weightData.length < 2) {
-    throw Exception("十分なデータがありません");
-  }
-
 
   List<WeightModel> previousData = weightData["1"]!;
   List<WeightModel> latestData = weightData["0"]!;
+
+  if (previousData.length != latestData.length) {
+    throw Exception("期間中bluetoothの接続が切れました");
+  }
 
   debugPrint('previousData: $previousData');
   debugPrint('latestData: $latestData');
@@ -99,6 +99,14 @@ Future<String> getMinWeightDevice(List<BluetoothDevice> connectedDevices) async 
       if (latest.deviceId == previous.deviceId) {
         int latestWeight = latest.data["sensor"];
         int previousWeight = previous.data["sensor"];
+        /* if (latestWeight < previousWeight) {
+          throw Exception("最新の重さが前回よりも小さいです");
+        }else if(latestWeight == previousWeight){
+          throw Exception("最新の重さが前回と同じです");
+        }else{
+          int difference = latestWeight - previousWeight;
+          differences[latest.deviceId] = difference;
+        } */
         int difference = (latestWeight - previousWeight).abs();   // task: 絶対値になっているので分岐で対応する
         differences[latest.deviceId] = difference;
       }
