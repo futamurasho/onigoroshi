@@ -59,7 +59,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
         if (mounted) {
           setState(() {
             _connectionState = BluetoothConnectionState.disconnected;
-            widget.updateConnectCount?.call(device,false);
+            // widget.updateConnectCount?.call(device,false);
           });
         }
       }).catchError((e) {
