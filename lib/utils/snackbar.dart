@@ -26,8 +26,26 @@ class Snackbar {
 
   static show(ABC abc, String msg, {required bool success}) {
     final snackBar = success
-        ? SnackBar(content: Text(msg), backgroundColor: Colors.blue)
-        : SnackBar(content: Text(msg), backgroundColor: Colors.red);
+        ? SnackBar(content: Text(
+          msg ,
+          style: TextStyle(
+          color: Colors.black,
+          fontSize: 20,
+          fontFamily: 'Yuji',
+        ),
+        ), 
+        backgroundColor:Colors.transparent,
+        )
+        : SnackBar(content: Text(
+          msg,
+          style: TextStyle(
+          color: Colors.black,
+          fontSize: 20,
+          fontFamily: 'Yuji',
+        ),
+          ), 
+          backgroundColor: Colors.transparent,
+          );
     getSnackbar(abc).currentState?.removeCurrentSnackBar();
     getSnackbar(abc).currentState?.showSnackBar(snackBar);
   }

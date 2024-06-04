@@ -148,28 +148,67 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
   Widget buildScanButton(BuildContext context) {
     if (FlutterBluePlus.isScanningNow) {
       return ElevatedButton(
-        child: const Text("STOP"), 
-        style: ElevatedButton.styleFrom(
+        child: const Text(
+          "すとっぷ",
+          style: TextStyle(
+            color:Colors.black,
+            fontSize: 20.0,
+            fontFamily: 'Yuji'
+          ),
+        ), 
+        style:ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+                fixedSize: Size(150, 40),
+                 shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            ),
+                side: BorderSide(
+                  color: Colors.black,
+                  width: 3,
+                )
+               ),
+        /*style: ElevatedButton.styleFrom(
           backgroundColor: Colors.red,
           foregroundColor: Colors.white,
           fixedSize: Size(150, 40),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-        ),
+        ),*/
         onPressed: onStopPressed,
       );
     } else {
       return ElevatedButton(
-        child: const Text("SCAN"), 
-        style: ElevatedButton.styleFrom(
+        child: const Text(
+          "すきゃん",
+          style: TextStyle(
+            color:Colors.black,
+            fontSize: 20.0,
+            fontFamily: 'Yuji'
+          ),
+          ), 
+          style:ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+                fixedSize: Size(150, 40),
+                 shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            ),
+                side: BorderSide(
+                  color: Colors.black,
+                  width: 3,
+                )
+               ),
+
+        /*style: ElevatedButton.styleFrom(
           backgroundColor: Colors.purple,
           foregroundColor: Colors.white,
           fixedSize: Size(150, 40),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-        ),
+        ),*/
         onPressed: onScanPressed,
       );
     }
@@ -178,7 +217,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
   List<Widget> _buildScanResultTiles(BuildContext context) {
     return _scanResults
         .where((r) => r.device.platformName != '')  // Filter out devices with no name 
-        .where((r) => r.device.platformName.contains('ONIGOROSHI'))
+        // .where((r) => r.device.platformName.contains('ONIGOROSHI'))
         .map(
           (r) => ScanResultTile(
             result: r,
@@ -194,7 +233,14 @@ Widget build(BuildContext context) {
     key: Snackbar.snackBarKeyB,
     child: Scaffold(
       appBar: AppBar(
-        title: const Text('コースタを探す'),
+        title: const Text(
+          'コースタを探す',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color:Colors.black,
+            fontFamily: 'Yuji',
+          ),
+          ),
         leadingWidth: 85,
         backgroundColor: Colors.transparent,
         leading: IconButton(
@@ -207,7 +253,7 @@ Widget build(BuildContext context) {
         body: Container(
           decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('images/background_1.png'),
+            image: AssetImage('images/background_2.jpeg'),
             fit: BoxFit.fill
             )
         ),
@@ -232,15 +278,34 @@ Widget build(BuildContext context) {
                     buildScanButton(context),
                     SizedBox(height: 15),
                     ElevatedButton(
-                      child: const Text('ゲーム設定へ'),
-                      style: ElevatedButton.styleFrom(
+                      child: const Text(
+                        'ゲーム設定へ',
+                        style: TextStyle(
+            color:Colors.black,
+            fontSize: 20.0,
+            fontFamily: 'Yuji'
+          ),
+                        ),
+                        style:ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+                fixedSize: Size(150, 40),
+                 shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            ),
+                side: BorderSide(
+                  color: Colors.black,
+                  width: 3,
+                )
+               ),
+                      /*style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey,
                         foregroundColor: Colors.white,
                         fixedSize: Size(150, 40),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
-                      ),
+                      ),*/
                       onPressed: () {
                         onGameSettingPressed();
                       },
