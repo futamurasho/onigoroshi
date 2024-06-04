@@ -39,16 +39,42 @@ const int switchPin = 36;  //read only Pin
 const int ledPin = 26;
 const int numPixels = 9;
 const int brightness = 50;
-
-
+const int loadingInterval = 150;
 
 // JSON format : {"sensor" : (pressureValue) , "switch" : (pressCount) }
 // ***********************************************************************
+
+// ***************************** colors **********************************
+const int colorList[][3] = {
+    {255, 0, 0},      // 0:赤
+    {0, 0, 255},      // 1:青
+    {255, 255, 0},    // 2:黄
+    {0, 255, 0},      // 3:緑
+    {128, 0, 128},    // 4:紫
+    {255, 140, 160},  // 5:ピンク
+    {255, 255, 255},  // 6:白
+    {255, 145, 0},    // 7:オレンジ
+    {0, 255, 255},    // 8:水色
+    {173, 255, 47}    // 9:黄緑
+};
+
+// ***********************************************************************
+
+int colorCode = 6;
+int red = 255;
+int green = 255;
+int blue = 255;
 
 int switchState = 0;
 int lastSwitchState = 0;
 int pressCount = 0;
 int pressureValue = 0;
+
+int lightColor = 6;
+int lightMode = 0;
+
+int lastLightChangeTime = 0;
+int lastLightNum = 0;
 
 HX711 scale;
 Adafruit_NeoPixel pixels(numPixels, ledPin, NEO_GRB + NEO_KHZ800);
@@ -85,16 +111,25 @@ class MyCallbacks : public BLECharacteristicCallbacks {
       Serial.println("*********");
       Serial.print("Received Value: ");
       for (int i = 0; i < rxValue.length(); i++) {
-        Serial.printf("%02X ", (unsigned int)rxValue[i]);
+        Serial.printf("%02X, ", (unsigned int)rxValue[i]);
       }
       Serial.println();
       Serial.println("*********");
-      if (rxValue[0] == 1){
-        Serial.println("light");
-        analogWrite(ledPin, 255);
-        delay(1000);
-        analogWrite(ledPin, 0);
+      // change color
+      if((unsigned int)rxValue[0] != 0){
+        colorCode = (unsigned int)rxValue[0] - '0';
+        if(colorCode >= 0 && colorCode <= 9){
+          red = colorList[colorCode][0];
+          green = colorList[colorCode][1];
+          blue = colorList[colorCode][2];
+        }
       }
+      // change lightmode
+      if((unsigned int)rxValue[1] != 0){
+        lightMode = (unsigned int)rxValue[1] - '0';
+      }
+      Serial.printf("%d, %d, %d, %d,%d, %d, %d", (unsigned int)rxValue[0], unsigned int)rxValue[1], colorCode, lightMode, red, green, blue);
+      Serial.println();
     }
   }
 };
@@ -164,34 +199,34 @@ void setup() {
 }
 
 void loop() {
-
   if (deviceConnected) {
     //read the value
     if (scale.is_ready()) {
       pressureValue = scale.read();
     } else {
-      Serial.println("HX711 not found.");
+      //Serial.println("HX711 not found.");
     }
 
     // Read the switch state
     switchState = digitalRead(switchPin);
     if (switchState == LOW && lastSwitchState == HIGH) {
       pressCount++;
-        // pixels.setPixelColor(1, pixels.Color(100, 255, 100));
-        // pixels.show();
-        // delay(1000);
-        // pixels.clear();
-        for(int i=0; i<numPixels; i++) {
-          pixels.setPixelColor(i, pixels.Color(100, 255, 100));
-          pixels.show();
-          delay(1000);
-  }
+      // pixels.setPixelColor(1, pixels.Color(100, 255, 100));
+      // pixels.show();
+      // delay(1000);
+      // pixels.clear();
+      for(int i=0; i<numPixels; i++) {
+        pixels.setPixelColor(i, pixels.Color(red, green, blue));
+        pixels.show();
+        delay(1000);
+      }
+      pixels.clear();
     }
     lastSwitchState = switchState;
 
     // Prepare the JSON formatted string
     String jsonString = String("{\"sensor\":") + pressureValue + ",\"switch\":" + pressCount + "}";
-    Serial.println(jsonString);
+    //Serial.println(jsonString);
 
     // Send the JSON string
     pTxCharacteristic->setValue(jsonString.c_str());
@@ -208,6 +243,16 @@ void loop() {
     }
     delay(measurementInterval);  // bluetooth stack will go into congestion, if too many packets are sent
   }
+  else{
+    if(lastLightChangeTime % loadingInterval == 0){
+      pixels.setPixelColor(lastLightNum, pixels.Color(0, 0, 0));
+        lastLightNum = (lastLightNum + 1) % numPixels;
+        pixels.setPixelColor(lastLightNum, pixels.Color(255, 255, 255));
+        pixels.show();
+    }
+    lastLightChangeTime += measurementInterval;
+    delay(measurementInterval);
+  }
 
   // disconnecting
   if (!deviceConnected && oldDeviceConnected) {
@@ -220,5 +265,15 @@ void loop() {
   if (deviceConnected && !oldDeviceConnected) {
     // do stuff here on connecting
     oldDeviceConnected = deviceConnected;
+    for(int i=0; i<3; i++) {
+      for(int j=0; j<numPixels; j++) {
+        pixels.setPixelColor(j, pixels.Color(red, green, blue));
+      }
+      pixels.show();
+      delay(300);
+      pixels.clear();
+      pixels.show();
+      delay(300);
+    }
   }
 }
