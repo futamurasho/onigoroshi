@@ -64,26 +64,23 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     super.dispose();
   }
 
-  final connectionSnackBar = SnackBar(
-    content: const Text("Normal SnackBar!!"),
-    duration: const Duration(seconds: 10),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-    margin: const EdgeInsets.only(left: 23, right: 23, bottom: 23),
-    behavior: SnackBarBehavior.floating,
-  );
-
   void updateConnectCount(BluetoothDevice device, bool increment) {
     debugPrint("updateConnectCount: $increment");
     setState(() {
-      _connectCount += increment ? 1 : -1;
-      if (increment) {
-        ref.read(connectedDevicesProvider.notifier).addDevice(device);
-      } else {
-        ref.read(connectedDevicesProvider.notifier).removeDevice(device);
+      if (_connectCount == 0 && increment == false) {
+        return;
       }
-    });
-    Snackbar.show(ABC.b, "現在 ${_connectCount}個接続しています", success: true);
-    debugPrint("Connected Devices: ${ref.read(connectedDevicesProvider)}");
+      else{
+        _connectCount += increment ? 1 : -1;
+        if (increment) {
+          ref.read(connectedDevicesProvider.notifier).addDevice(device);
+        } else {
+          ref.read(connectedDevicesProvider.notifier).removeDevice(device);
+        }
+        Snackbar.show(ABC.b, "現在 ${_connectCount}個接続しています", success: true);
+        debugPrint("Connected Devices: ${ref.read(connectedDevicesProvider)}");
+      }
+      });
   }
 
   // ゲーム設定ボタンが押されたときの処理

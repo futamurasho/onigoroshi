@@ -127,12 +127,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     builder: (context) => BluetoothOnTile(),
                   ));
       },
-      /*Navigator.push(
-                  context, 
-                  MaterialPageRoute(
-                    builder: (context) => SelectPage(),
-                  ));
-      },*/
     ),
       ),
     );
