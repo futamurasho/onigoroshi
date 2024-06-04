@@ -35,7 +35,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
       body:Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('images/background_1.png'),
+            image: AssetImage('images/background_2.jpeg'),
             fit: BoxFit.fill
             )
         ),

@@ -46,7 +46,7 @@ class _StartPageState extends ConsumerState<StartPage> {
       body:Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('images/background_1.png'),
+            image: AssetImage('images/background_2.jpeg'),
             fit: BoxFit.fill
             )
         ),
@@ -115,14 +115,21 @@ class _StartPageState extends ConsumerState<StartPage> {
                               ),
                             ),
                             ElevatedButton(
-                              child: const Text('再設定'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
-                                foregroundColor: Colors.white,
-                                fixedSize: Size(100, 40),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
+                              child: const Text(
+                                '再設定',
+                                style: TextStyle(
+                                  fontFamily:'Yuji',
+                                  fontSize: 30,
+                                  color: Colors.black
+                                  )
                                   ),
+                              style:ElevatedButton.styleFrom(
+                                elevation: 0,
+                                backgroundColor: Colors.transparent,
+                                side: BorderSide(
+                                  color: Colors.black,
+                                  width:3,
+                                  )
                                   ),
                                   onPressed: () => Navigator.of(context).pop()
                                   ),
