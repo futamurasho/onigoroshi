@@ -38,8 +38,9 @@ const int LOADCELL_SCK_PIN = 32;
 const int switchPin = 36;  //read only Pin
 const int ledPin = 26;
 const int numPixels = 9;
-const int brightness = 50;
+const int brightness = 100;
 const int loadingInterval = 150;
+const int blinkingInterval = 150;
 
 // JSON format : {"sensor" : (pressureValue) , "switch" : (pressCount) }
 // ***********************************************************************
@@ -58,6 +59,11 @@ const int colorList[][3] = {
     {173, 255, 47}    // 9:黄緑
 };
 
+/* mode
+  0:消灯
+  1:点灯
+  2:点滅
+  3:待機*/
 // ***********************************************************************
 
 int colorCode = 6;
@@ -128,8 +134,8 @@ class MyCallbacks : public BLECharacteristicCallbacks {
       if((unsigned int)rxValue[1] != 0){
         lightMode = (unsigned int)rxValue[1] - '0';
       }
-      Serial.printf("%d, %d, %d, %d,%d, %d, %d", (unsigned int)rxValue[0], unsigned int)rxValue[1], colorCode, lightMode, red, green, blue);
-      Serial.println();
+      pixels.clear();
+      pixels.show();
     }
   }
 };
@@ -211,18 +217,49 @@ void loop() {
     switchState = digitalRead(switchPin);
     if (switchState == LOW && lastSwitchState == HIGH) {
       pressCount++;
-      // pixels.setPixelColor(1, pixels.Color(100, 255, 100));
-      // pixels.show();
-      // delay(1000);
-      // pixels.clear();
-      for(int i=0; i<numPixels; i++) {
-        pixels.setPixelColor(i, pixels.Color(red, green, blue));
-        pixels.show();
-        delay(1000);
-      }
-      pixels.clear();
+      // Prepare the JSON formatted string
+      String jsonString = String("{\"sensor\":") + pressureValue + ",\"switch\":" + pressCount + "}";
+      //Serial.println(jsonString);
+
+      // Send the JSON string
+      pTxCharacteristic->setValue(jsonString.c_str());
+      pTxCharacteristic->notify();
+      Serial.println("notified");
     }
     lastSwitchState = switchState;
+
+    // set LED
+    if(lightMode == 0){
+      pixels.clear();
+      pixels.show();
+    }else if(lightMode == 1){
+      for(int i=0; i<numPixels; i++) {
+        pixels.setPixelColor(i, pixels.Color(red, green, blue));
+      }
+      pixels.show();
+    }else if(lightMode == 2){
+      for(int i=lastLightNum; i<numPixels; i += 2) {
+        pixels.setPixelColor(i, pixels.Color(red, green, blue));
+      }
+      for(int i=abs(lastLightNum-1); i<numPixels; i += 2) {
+        pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+      }
+      pixels.show();
+      if(lastLightChangeTime % blinkingInterval < measurementInterval){
+        lastLightNum = (lastLightNum + 1) % 2;
+        lastLightChangeTime = 0;
+      }
+      lastLightChangeTime += measurementInterval;
+    }else if(lightMode == 3){
+      if(lastLightChangeTime % loadingInterval < measurementInterval){
+        pixels.setPixelColor(lastLightNum, pixels.Color(0, 0, 0));
+        lastLightNum = (lastLightNum + 1) % numPixels;
+        pixels.setPixelColor(lastLightNum, pixels.Color(red, green, blue));
+        pixels.show();
+        lastLightChangeTime = 0;
+      }
+      lastLightChangeTime += measurementInterval;
+    }
 
     // Prepare the JSON formatted string
     String jsonString = String("{\"sensor\":") + pressureValue + ",\"switch\":" + pressCount + "}";
@@ -244,11 +281,12 @@ void loop() {
     delay(measurementInterval);  // bluetooth stack will go into congestion, if too many packets are sent
   }
   else{
-    if(lastLightChangeTime % loadingInterval == 0){
+    if(lastLightChangeTime % loadingInterval < measurementInterval){
       pixels.setPixelColor(lastLightNum, pixels.Color(0, 0, 0));
-        lastLightNum = (lastLightNum + 1) % numPixels;
-        pixels.setPixelColor(lastLightNum, pixels.Color(255, 255, 255));
-        pixels.show();
+      lastLightNum = (lastLightNum + 1) % numPixels;
+      pixels.setPixelColor(lastLightNum, pixels.Color(255, 255, 255));
+      pixels.show();
+      lastLightChangeTime = 0;
     }
     lastLightChangeTime += measurementInterval;
     delay(measurementInterval);
@@ -260,11 +298,18 @@ void loop() {
     pServer->startAdvertising();  // restart advertising
     Serial.println("start advertising");
     oldDeviceConnected = deviceConnected;
+
+    pixels.clear();
+    pixels.show();
+    lightMode = 0;
+    colorCode = 6;
   }
   // connecting
   if (deviceConnected && !oldDeviceConnected) {
     // do stuff here on connecting
     oldDeviceConnected = deviceConnected;
+    lightMode = 0;
+    colorCode = 6;
     for(int i=0; i<3; i++) {
       for(int j=0; j<numPixels; j++) {
         pixels.setPixelColor(j, pixels.Color(red, green, blue));
