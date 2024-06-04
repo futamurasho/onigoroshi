@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:onigoroshi_demo/screens/select_page.dart';
+import 'package:onigoroshi_demo/screens/instruction_screen.dart';
+import 'package:onigoroshi_demo/screens/select_screen.dart';
 import 'widgets/bluetooth_on_tile.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
@@ -86,23 +87,52 @@ class _MyHomePageState extends State<MyHomePage> {
                   ],
                   repeatForever: true,
                 ),
-              )
+              ),
+
+              Container(
+                height: 50,
+              ),
+              ElevatedButton(
+              onPressed: (){
+                Navigator.push(
+                  context, 
+                  MaterialPageRoute(
+                    builder: (context) => Instructionscreen(),
+                  ));
+              },
+               child: Text(
+                '遊び方',
+                style: TextStyle(
+                  fontFamily:'Yuji',
+                  fontSize: 40,
+                  color: Colors.black
+                  )
+               ),
+               style:ElevatedButton.styleFrom(
+                //elevation: 0,
+                backgroundColor: Colors.transparent,
+                side: BorderSide(
+                  color: Colors.black,
+                  width:3,
+                )
+               )
+               ),
           ]
         ),
       ),
       onTap: (){
-      /*Navigator.push(
+      Navigator.push(
                   context, 
                   MaterialPageRoute(
                     builder: (context) => BluetoothOnTile(),
                   ));
-      },*/
-      Navigator.push(
+      },
+      /*Navigator.push(
                   context, 
                   MaterialPageRoute(
                     builder: (context) => SelectPage(),
                   ));
-      },
+      },*/
     ),
       ),
     );

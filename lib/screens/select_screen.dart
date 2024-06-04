@@ -34,17 +34,44 @@ class music {
 }
 
 class _SelectPageState extends State<SelectPage> {
+  //時間の変数
   int _nTotalCount=12;
   int _nInitValue=5;
   int _nCurrentValue=5;
+  bool isVisible=true;
+  //ゲーム選択の変数
+  var _segselected=<int>{0};
   //選択された罰ゲームのリスト
   List<dynamic> _selected=[];
 
+//セグメントボタンでのbool値切り替え
+  void toggleShow(){
+    isVisible = !isVisible;
+  }
+
   final snackBar_p = SnackBar(
-      content: Text('罰ゲームを選択してください'),
+      content: Text(
+        '罰ゲームを選択してください',
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: 20,
+          fontFamily: 'Yuji',
+        ),
+      ),
+      backgroundColor: Colors.transparent,
+      
   );
   final snackBar_m = SnackBar(
-      content: Text('0分以外を選択してください'),
+      content: Text(
+        '0分以外を選択してください',
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: 20,
+          fontFamily: 'Yuji',
+        ),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
   );
   final _items=_punishments.map((e) => MultiSelectItem<Punishment>(e, e.name)).toList();
   int selectedindex=1;//選ばれた音楽のid
@@ -58,7 +85,7 @@ class _SelectPageState extends State<SelectPage> {
   
 //罰ゲーム一覧
   static List<Punishment> _punishments = [
-    Punishment(id: 1, name: "あ"),
+    Punishment(id: 1, name: "あああああああああああああああ"),
     Punishment(id: 2, name: "い"),
     Punishment(id: 3, name: "う"),
   ];
@@ -141,7 +168,7 @@ class _SelectPageState extends State<SelectPage> {
           'ゲーム設定',
           style:TextStyle(
                   fontFamily:'Yuji',
-                  fontSize: 45,
+                  fontSize: 40,
                   )
           ),
         leadingWidth: 85,
@@ -157,15 +184,16 @@ class _SelectPageState extends State<SelectPage> {
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('images/background_1.png'),
+            image: AssetImage('images/background_2.jpeg'),
             fit: BoxFit.fill
             )
         ),
         child: Column(
           children: <Widget>[
             Container(
-              height: 120,
+              height: 150,
             ),
+
             Text(
                 '時間(分)',
                  style:TextStyle(
@@ -173,6 +201,7 @@ class _SelectPageState extends State<SelectPage> {
                   fontSize: 25,
                   )
             ),
+            //ホイール
             WheelSlider.number(
               perspective: 0.01,
               totalCount: _nTotalCount,//1
@@ -195,21 +224,101 @@ class _SelectPageState extends State<SelectPage> {
               },
               hapticFeedbackType: HapticFeedbackType.heavyImpact,
             ),
-            Text(
+
+            //セグメントボタン
+            SegmentedButton<int>(
+              onSelectionChanged: (set) {
+                setState(() {
+                  _segselected=set;
+                  _selected=[];
+                  toggleShow();
+                });
+              },
+              showSelectedIcon: false,
+              segments: [
+                ButtonSegment(value: 0, label: Text(
                   '罰ゲーム',
+                  style:TextStyle(
+                  fontFamily:'Yuji',
+                  )
+                  )),
+                ButtonSegment(value: 1, label: Text(
+                  'コール',
+                  style:TextStyle(
+                  fontFamily:'Yuji',
+                  ))
+                  ),
+                ],
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                  (Set<WidgetState> states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return Colors.grey;
+                    }
+                    return Colors.transparent;
+                  },
+                ),
+                ),
+                selected: _segselected,
+                ),
+
+            Visibility(
+              visible: isVisible,
+              replacement: Expanded(
+                child:Column(
+                children: <Widget>[
+                  Text(
+                  'コール音',
                    style:TextStyle(
                   fontFamily:'Yuji',
                   fontSize: 25,
                   )
             ),
-            //以下変更
-              Padding(
+            //音楽選択画面
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 30.0,right: 30.0,bottom: 30.0),
+                child: ListView(
+                  
+                  children: [
+                _menuItem(_musics[0]),
+                _menuItem(_musics[1]),
+                _menuItem(_musics[2]),
+                ],
+            ),
+              )
+              )
+                ],
+              ),
+              ),
+              child: Expanded(
+                child: Column(
+                children: <Widget>[
+                  Text(
+                  '罰ゲーム',
+                   style:TextStyle(
+                  fontFamily:'Yuji',
+                  fontSize: 25,
+                  )
+                  ),
+                  Padding(
               padding: const EdgeInsets.all(30.0),
               child: 
                   MultiSelectDialogField(
-                buttonText: Text('選択'),
+                    title: Text(
+                      '罰ゲーム',
+                    style:TextStyle(
+                    fontFamily:'Yuji',
+                  )
+                  ),
+                buttonText: Text(
+                  '選択',
+                  style:TextStyle(
+                  fontFamily:'Yuji',
+                  fontSize: 20
+                  )),
                 cancelText: Text(
-                  'キャンセル',
+                  '戻る',
                   style: TextStyle(
                     color: Colors.black
                   )
@@ -222,36 +331,26 @@ class _SelectPageState extends State<SelectPage> {
                   )
                   ),
 
-                  chipDisplay: MultiSelectChipDisplay.none(),
-              items: _items,
-              listType: MultiSelectListType.CHIP,
-              onConfirm: (values){
-                _selected=values;
+                  chipDisplay: MultiSelectChipDisplay(
+                    chipColor: Colors.grey,
+                    textStyle: TextStyle(
+                      color: Colors.black,
+                      fontSize: 15,
+                      fontFamily: 'Yuji'
+                    )
+                  ),
+                items: _items,
+                listType: MultiSelectListType.CHIP,
+                onConfirm: (values){
+                  _selected=values;
               },
-                ),
-              ),        
-            Text(
-                  'コール音',
-                   style:TextStyle(
-                  fontFamily:'Yuji',
-                  fontSize: 25,
-                  )
-            ),
-            //音楽選択画面
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 30.0,right: 30.0,bottom: 30.0),
-                child: ListView(
-                  children: [
-                _menuItem(_musics[0]),
-                _menuItem(_musics[1]),
-                _menuItem(_musics[2]),
-                ],
-            ),
+              ),
+              ), 
+              ],
               )
-              
-            ),
-            
+              ),
+              ),
+
             const Text(
               'コースターにコップを置いたら',
               style: TextStyle(
@@ -266,19 +365,27 @@ class _SelectPageState extends State<SelectPage> {
                 fontSize: 20,
               )
             ),
-            TextButton(
+            ElevatedButton(
               onPressed: (){
                 inspect(_selected);
                 decidepushed();
               },
-               child: const Text(
+               child: Text(
                 '決定',
                 style: TextStyle(
                   fontFamily:'Yuji',
                   fontSize: 40,
                   color: Colors.black
                   )
-                  ),
+               ),
+               style:ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+                side: BorderSide(
+                  color: Colors.black,
+                  width:3,
+                )
+               )
                ),
                
                //下の微調整
