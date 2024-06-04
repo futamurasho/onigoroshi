@@ -1,25 +1,57 @@
+/*
+    Video: https://www.youtube.com/watch?v=oCMOYS71NIU
+    Based on Neil Kolban example for IDF: https://github.com/nkolban/esp32-snippets/blob/master/cpp_utils/tests/BLE%20Tests/SampleNotify.cpp
+    Ported to Arduino ESP32 by Evandro Copercini
+
+   Create a BLE server that, once we receive a connection, will send periodic notifications.
+   The service advertises itself as: 6E400001-B5A3-F393-E0A9-E50E24DCCA9E
+   Has a characteristic of: 6E400002-B5A3-F393-E0A9-E50E24DCCA9E - used for receiving data with "WRITE"
+   Has a characteristic of: 6E400003-B5A3-F393-E0A9-E50E24DCCA9E - used to send data with  "NOTIFY"
+
+   The design of creating the BLE server is:
+   1. Create a BLE Server
+   2. Create a BLE Service
+   3. Create a BLE Characteristic on the Service
+   4. Create a BLE Descriptor on the characteristic
+   5. Start the service.
+   6. Start advertising.
+
+   In this example rxValue is the data received (only accessible inside that function).
+   And txValue is the data to be sent, in this example just a byte incremented every second.
+*/
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <BLE2902.h>
+#include <M5StickC.h>
+#include <HX711.h>
+#include <Adafruit_NeoPixel.h>
 
 // *************************** parameters ********************************
 String deviceName = "ONIGOROSHI";
-bool sendMode = 0; // 0:send query   1:Notify
-int notifyInterval = 1000;  // sending interval (Notify)
-int measurementInterval = 50;
-int resolution = 10;  //set the resolution to 10 bits (0-1023)
-int sensorPin = 26;
-int switchPin = 36;  //read only Pin
-int ledPin1 = 32;
-int ledPin2 = 33;
+const bool sendMode = 0; // 0:send query   1:Notify
+const int notifyInterval = 1000;  // sending interval (Notify)
+const int measurementInterval = 50;
+const int resolution = 10;  //set the resolution to 10 bits (0-1023)
+const int LOADCELL_DOUT_PIN = 33;
+const int LOADCELL_SCK_PIN = 32;
+const int switchPin = 36;  //read only Pin
+const int ledPin = 26;
+const int numPixels = 9;
+const int brightness = 50;
+
+
 
 // JSON format : {"sensor" : (pressureValue) , "switch" : (pressCount) }
 // ***********************************************************************
 
 int switchState = 0;
 int lastSwitchState = 0;
-unsigned long pressCount = 0;
+int pressCount = 0;
+int pressureValue = 0;
+
+HX711 scale;
+Adafruit_NeoPixel pixels(numPixels, ledPin, NEO_GRB + NEO_KHZ800);
 
 BLEServer *pServer = NULL;
 BLECharacteristic *pTxCharacteristic;
@@ -59,12 +91,11 @@ class MyCallbacks : public BLECharacteristicCallbacks {
       Serial.println();
       Serial.println("*********");
       if (rxValueStr[0] == 1){
-        Serial.println("light");
-        analogWrite(ledPin1, 255);
-        analogWrite(ledPin2, 255);
-        delay(1000);
-        analogWrite(ledPin1, 0);
-        analogWrite(ledPin2, 0);
+        for(int i=0; i<numPixels; i++) {
+          pixels.setPixelColor(i, pixels.Color(100, 255, 100));
+          pixels.show();
+          delay(1);
+        }
       }
     }
   }
@@ -90,16 +121,22 @@ String generateRandomUUID() {
 }
 
 void setup() {
+  pinMode(LOADCELL_DOUT_PIN, INPUT);
+  pinMode(LOADCELL_SCK_PIN, OUTPUT);
+  pinMode(switchPin, INPUT);
+  pinMode(ledPin, OUTPUT);
 
+  // initialize the scale device
   Serial.begin(115200);
+  scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
+  M5.begin();
+
+  // initialize the LED device
+  pixels.begin();
+  pixels.setBrightness(brightness);
 
   //set the resolution to 8 bits (0-255)
   analogReadResolution(resolution);
-
-  pinMode(sensorPin, INPUT);
-  pinMode(switchPin, INPUT);
-  pinMode(ledPin1, OUTPUT);
-  pinMode(ledPin2, OUTPUT);
 
   // Create the BLE Device
   BLEDevice::init(deviceName.c_str());
@@ -125,24 +162,27 @@ void setup() {
 
   // Start advertising
   pServer->getAdvertising()->start();
-  Serial.println("Waiting for a client connection to notify...");
+  Serial.println("Waiting a client connection to notify...");
 }
 
 void loop() {
 
   if (deviceConnected) {
     //read the value
-    int pressureValue = analogRead(sensorPin);
+    if (scale.is_ready()) {
+      pressureValue = scale.read();
+    } else {
+      Serial.println("HX711 not found.");
+    }
 
     // Read the switch state
     switchState = digitalRead(switchPin);
     if (switchState == LOW && lastSwitchState == HIGH) {
       pressCount++;
-      analogWrite(ledPin1, 255);
-      analogWrite(ledPin2, 255);
-      delay(1000);
-      analogWrite(ledPin1, LOW);
-      analogWrite(ledPin2, LOW);
+        // pixels.setPixelColor(1, pixels.Color(100, 255, 100));
+        // pixels.show();
+        // delay(1000);
+        // pixels.clear();
     }
     lastSwitchState = switchState;
 
