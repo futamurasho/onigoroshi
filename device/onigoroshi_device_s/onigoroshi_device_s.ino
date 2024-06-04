@@ -29,8 +29,8 @@
 
 // *************************** parameters ********************************
 String deviceName = "ONIGOROSHI";
-const bool sendMode = 0; // 0:send query   1:Notify
-const int notifyInterval = 1000;  // sending interval (Notify)
+const int sendMode = 1; // 0:send query only   1:Notify when switch pressed   2:Periodic Notify
+const int notifyInterval = 1000;  // sending interval (Notify in sendMode 2)
 const int measurementInterval = 50;
 const int resolution = 10;  //set the resolution to 10 bits (0-1023)
 const int LOADCELL_DOUT_PIN = 33;
@@ -222,9 +222,11 @@ void loop() {
       //Serial.println(jsonString);
 
       // Send the JSON string
-      pTxCharacteristic->setValue(jsonString.c_str());
-      pTxCharacteristic->notify();
-      Serial.println("notified");
+      if(sendMode == 1){
+        pTxCharacteristic->setValue(jsonString.c_str());
+        pTxCharacteristic->notify();
+        Serial.println("notified");
+      }
     }
     lastSwitchState = switchState;
 
@@ -265,15 +267,16 @@ void loop() {
     String jsonString = String("{\"sensor\":") + pressureValue + ",\"switch\":" + pressCount + "}";
     //Serial.println(jsonString);
 
-    // Send the JSON string
-    pTxCharacteristic->setValue(jsonString.c_str());
-
-    if (sendMode) {
+    if (sendMode == 0) {
+      pTxCharacteristic->setValue(jsonString.c_str());
+    }
+    if (sendMode == 2) {
       // Check the measurement interval
       static unsigned long lastMeasurementTime = 0;
       unsigned long currentTime = millis();
       if (currentTime - lastMeasurementTime >= notifyInterval) {
         lastMeasurementTime = currentTime;
+        pTxCharacteristic->setValue(jsonString.c_str());
         pTxCharacteristic->notify();
         Serial.println("notified");
       }
@@ -303,6 +306,9 @@ void loop() {
     pixels.show();
     lightMode = 0;
     colorCode = 6;
+    red = 255;
+    green = 255;
+    blue = 255;
   }
   // connecting
   if (deviceConnected && !oldDeviceConnected) {
