@@ -68,7 +68,7 @@ Future<String> writeToMinDevice(String deviceID, List<BluetoothDevice> connected
     var characteristics = service.characteristics;
     for(BluetoothCharacteristic c in characteristics) {
       if (c.uuid.toString() == resultCharacteristicUUID) {
-        await c.write([1]);
+        await c.write([]);
         debugPrint('write "1" to $deviceID');
       }
     }
