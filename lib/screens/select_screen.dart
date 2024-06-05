@@ -39,10 +39,27 @@ class _SelectPageState extends State<SelectPage> {
   int _nInitValue=5;
   int _nCurrentValue=5;
   bool isVisible=true;
+  int selectedindex=1;//選ばれた音楽のid
   //ゲーム選択の変数
-  var _segselected=<int>{0};
+  var _gameselected=<int>{0};
+  var _game =0;
   //選択された罰ゲームのリスト
   List<dynamic> _selected=[];
+  //音変数
+  final player=AudioPlayer();
+  PlayerState? _playerState;
+  //音楽設定
+  Future<void> _play()async{
+    await player.resume();
+    setState(() =>_playerState = PlayerState.playing);
+  }
+
+  Future<void> _pause()async{
+    await player.pause();
+    setState(() =>_playerState = PlayerState.paused);
+  }
+  //再生中かどうか
+  bool get isPlaying => _playerState == PlayerState.playing;
 
 //セグメントボタンでのbool値切り替え
   void toggleShow(){
@@ -74,7 +91,6 @@ class _SelectPageState extends State<SelectPage> {
         backgroundColor: Colors.transparent,
   );
   final _items=_punishments.map((e) => MultiSelectItem<Punishment>(e, e.name)).toList();
-  int selectedindex=1;//選ばれた音楽のid
 
 //コール音一覧
   static List<music> _musics = [
@@ -85,9 +101,12 @@ class _SelectPageState extends State<SelectPage> {
   
 //罰ゲーム一覧
   static List<Punishment> _punishments = [
-    Punishment(id: 1, name: "あああああああああああああああ"),
-    Punishment(id: 2, name: "い"),
-    Punishment(id: 3, name: "う"),
+    Punishment(id: 1, name: "罰ゲーム１"),
+    Punishment(id: 2, name: "罰ゲーム２"),
+    Punishment(id: 3, name: "罰ゲーム３"),
+    Punishment(id: 4, name: "罰ゲーム４"),
+    Punishment(id: 5, name: "罰ゲーム５"),
+    Punishment(id: 6, name: "罰ゲーム６"),
   ];
 
 // コール音設定
@@ -116,6 +135,7 @@ class _SelectPageState extends State<SelectPage> {
                   music.pushed=!music.pushed;
                   //ここで音楽流す
                 });
+                //isPlaying ? _pause : _play;
               },
               icon: music.pushed? Icon(Icons.play_arrow) : Icon(Icons.stop_rounded)//true:false
               ),
@@ -136,11 +156,11 @@ class _SelectPageState extends State<SelectPage> {
 
   //決定押された時の処理
   void decidepushed(){
-    if(_selected.isEmpty){
-      ScaffoldMessenger.of(context).showSnackBar(snackBar_p);
-    }
-    else if(_nCurrentValue==0){
+    if(_nCurrentValue==0){
       ScaffoldMessenger.of(context).showSnackBar(snackBar_m);
+    }
+    else if(_selected.isEmpty && isVisible){
+      ScaffoldMessenger.of(context).showSnackBar(snackBar_p);
     }
     else{
       Navigator.push(
@@ -148,15 +168,16 @@ class _SelectPageState extends State<SelectPage> {
                     builder: (context) => StartPage(
                       minutes: _nCurrentValue,
                       music_id: selectedindex,
-                     Punishment: _selected, )));
+                     Punishment: _selected,
+                     game: isVisible )));
     }
   }
 
-
-
+ 
   @override
   void initState() {
     super.initState();
+    _playerState=player.state;
   }
 
   @override
@@ -229,7 +250,7 @@ class _SelectPageState extends State<SelectPage> {
             SegmentedButton<int>(
               onSelectionChanged: (set) {
                 setState(() {
-                  _segselected=set;
+                  _gameselected=set;
                   _selected=[];
                   toggleShow();
                 });
@@ -259,7 +280,7 @@ class _SelectPageState extends State<SelectPage> {
                   },
                 ),
                 ),
-                selected: _segselected,
+                selected: _gameselected,
                 ),
 
             Visibility(

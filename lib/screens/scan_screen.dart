@@ -217,7 +217,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
   List<Widget> _buildScanResultTiles(BuildContext context) {
     return _scanResults
         .where((r) => r.device.platformName != '')  // Filter out devices with no name 
-        // .where((r) => r.device.platformName.contains('ONIGOROSHI'))
+         .where((r) => r.device.platformName.contains('ONIGOROSHI'))
         .map(
           (r) => ScanResultTile(
             result: r,

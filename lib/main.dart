@@ -121,18 +121,18 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       onTap: (){
-      Navigator.push(
+      /*Navigator.push(
                   context, 
                   MaterialPageRoute(
                     builder: (context) => BluetoothOnTile(),
                   ));
-      },
-      /*Navigator.push(
+      },*/
+      Navigator.push(
                   context, 
                   MaterialPageRoute(
                     builder: (context) => SelectPage(),
                   ));
-      },*/
+      },
     ),
       ),
     );

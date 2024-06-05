@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:intl/intl.dart';
 import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:onigoroshi_demo/screens/select_screen.dart';
 
 import 'count_screen.dart';
 import 'scan_screen.dart';
@@ -13,11 +14,13 @@ class StartPage extends ConsumerStatefulWidget {
   final int minutes;
   final int music_id;
   final List<dynamic> Punishment;
+  final bool game;
   const StartPage({
     super.key,
     required this.minutes,
     required this.music_id,
     required this.Punishment,
+    required this.game
    });
   @override
   ConsumerState<StartPage> createState() => _StartPageState();
@@ -27,6 +30,10 @@ class _StartPageState extends ConsumerState<StartPage> {
   bool isVisible = true;//可視化のbool値
   int _counter = 0;//初期値
   bool stopflag = true;
+  late int minutes;
+  late int music_id;
+  late List<dynamic> Punishment;
+  late bool game;
   Timer? _timer;
   DateTime? _time;
   late final int _stopcounter;//ここを乱数にする
@@ -37,6 +44,11 @@ class _StartPageState extends ConsumerState<StartPage> {
   void initState(){
     _time=DateTime.utc(0,0,0);
     super.initState();
+    minutes=widget.minutes;
+    music_id=widget.music_id;
+    Punishment=widget.Punishment;
+    game=widget.game;
+
     _weightReadFuture = WeightRead(0,ref.read(connectedDevicesProvider));
   }
 
@@ -96,7 +108,12 @@ class _StartPageState extends ConsumerState<StartPage> {
                                         toggleFlag();
                                         Navigator.push(
                                             context, MaterialPageRoute(
-                                            builder: (context) => const CountPage()));
+                                            builder: (context) => CountPage(
+                                               minutes: minutes,
+                                               music_id: music_id,
+                                               Punishment: Punishment,
+                                               game: game,
+                                            )));
                                       }
                                       else{
                                         _time = _time?.add(Duration(seconds: 1));

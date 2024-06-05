@@ -1,69 +1,58 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:onigoroshi_demo/screens/roulette_screen.dart';
 import 'package:onigoroshi_demo/screens/start_screen.dart';
-import 'package:roulette/roulette.dart';
 import 'package:onigoroshi_demo/screens/select_screen.dart';
-import 'dart:math';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'scan_screen.dart';
 import '../utils/weight.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class RoulettePage extends ConsumerStatefulWidget {
+
+//タイマーがランダムに止まる
+class ResultPage extends ConsumerStatefulWidget {
   final int minutes;
   final int music_id;
   final List<dynamic> Punishment;
   final bool game;
-  const RoulettePage({
+  const ResultPage({
     super.key,
     required this.minutes,
     required this.music_id,
     required this.Punishment,
     required this.game
     });
-  
   @override
-  ConsumerState<RoulettePage> createState() => _RoulettePageState();
+  ConsumerState<ResultPage> createState() => _ResultPageState();
 }
 
-class _RoulettePageState extends ConsumerState<RoulettePage>
-    with SingleTickerProviderStateMixin {
+class _ResultPageState extends ConsumerState<ResultPage> {
+  bool isVisible = true;//可視化のbool値
+  //int _counter = 0;//初期値
+  bool stopflag = true;
   late Future<String> _minweightdevice;
-  late RouletteController _controller;
   late int minutes;
   late int music_id;
   late List<dynamic> Punishment;
   late bool game;
+  
   //デバッグ用
   final Future<String> _calculation = Future<String>.delayed(
     const Duration(seconds: 2),
     () => 'Data Loaded',
     );
-
-  bool _clockwise = true;
+  //Timer? _timer;
+  //DateTime? _time;
+  //late final int _stopcounter;//ここを乱数にする
 
   @override
-  void initState() {
-    _controller = RouletteController(
-        group: RouletteGroup([
-          const RouletteUnit.text('1',textStyle: TextStyle(color: Colors.black,fontSize: 20),color: Colors.transparent),
-          const RouletteUnit.text('2',textStyle: TextStyle(color: Colors.black,fontSize: 20),color: Colors.transparent),
-          const RouletteUnit.text('3',textStyle: TextStyle(color: Colors.black,fontSize: 20),color: Colors.transparent),
-          const RouletteUnit.text('4',textStyle: TextStyle(color: Colors.black,fontSize: 20),color: Colors.transparent),
-        ]),
-        vsync: this
-    );
-
+  void initState(){
+    //_time=DateTime.utc(0,0,0);
     super.initState();
-    minutes=widget.minutes;
-    music_id=widget.music_id;
-    Punishment=widget.Punishment;
-    game=widget.game;
     _minweightdevice = getMinWeightDevice(ref.read(connectedDevicesProvider));
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body:Container(
         decoration: const BoxDecoration(
@@ -79,7 +68,7 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
           List<Widget> children;
           if (snapshot.hasData) { // 値が存在する場合の処理
             children = <Widget>[
-              Container(
+               Container(
                 height: 100,
               ),
                Text(
@@ -94,89 +83,7 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
               Container(
                 height: 20,
               ),
-              ElevatedButton(
-              onPressed: () => _controller.rollTo(
-                2,
-                clockwise: _clockwise,
-                offset: Random().nextDouble(),
-                ),
-               child: Text(
-                'まわす',
-                style: TextStyle(
-                  fontFamily:'Yuji',
-                  fontSize: 30,
-                  color: Colors.black
-                  )
-               ),
-               style:ElevatedButton.styleFrom(
-                elevation: 0,
-                backgroundColor: Colors.transparent,
-                side: BorderSide(
-                  color: Colors.black,
-                  width:3,
-                )
-               )
-               ),
-               Container(
-                height: 40,
-               ),
-               //ルーレット
-               Stack(
-                alignment: Alignment.topCenter,
-                children: [
-                  SizedBox(
-                    width: 260,
-                    height: 260,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 30),
-                      child: Roulette(
-                        controller: _controller,
-                        style: const RouletteStyle(
-                          dividerThickness: 4,
-                          dividerColor: Colors.black,
-                          centerStickerColor: Colors.black
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Icon(
-                    FontAwesomeIcons.downLong,
-                    size: 45,
-                    color: Colors.black,
-                  ),
-                ],
-              ),
-              Container(
-                height: 50,
-              ),
-              Text('1:${widget.Punishment[0].name}',
-              style: TextStyle(
-                      fontFamily:'Yuji',
-                      fontSize: 30,
-                      color: Colors.black
-                  )),
-              Text('2:${widget.Punishment[1].name}',
-              style: TextStyle(
-                      fontFamily:'Yuji',
-                      fontSize: 30,
-                      color: Colors.black
-                  )),
-              Text('3:${widget.Punishment[2].name}',
-              style: TextStyle(
-                      fontFamily:'Yuji',
-                      fontSize: 30,
-                      color: Colors.black
-                  )),
-              Text('4:${widget.Punishment[3].name}',
-              style: TextStyle(
-                      fontFamily:'Yuji',
-                      fontSize: 30,
-                      color: Colors.black
-                  )),
-              Container(
-                height: 30,
-              ),
-               Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   ElevatedButton(
@@ -245,20 +152,11 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 16),
-                child: Text('Error: ${snapshot.error}', 
-                    style: TextStyle(
-                                fontFamily:'Yuji',
-                                fontSize: 30,
-                                color: Colors.black
-                                )
-                ),
+                child: Text('Error: ${snapshot.error}'),
               ),
             ];
           } else { // 値が存在しない場合の処理
-            children = <Widget>[
-              Container(
-                height: 400,
-              ),
+            children = const <Widget>[
               SizedBox(
                 width: 60,
                 height: 60,
@@ -272,7 +170,8 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
                       fontFamily:'Yuji',
                       fontSize: 30,
                       color: Colors.black
-                  )),
+                  )
+                  ),
               ),
             ];
           }
@@ -287,9 +186,5 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
    );
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  
 }
