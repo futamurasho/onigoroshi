@@ -87,6 +87,7 @@ Adafruit_NeoPixel pixels(numPixels, ledPin, NEO_GRB + NEO_KHZ800);
 
 BLEServer *pServer = NULL;
 BLECharacteristic *pTxCharacteristic;
+BLECharacteristic *pTRxCharacteristic;
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
 
@@ -94,8 +95,9 @@ bool oldDeviceConnected = false;
 // https://www.uuidgenerator.net/
 
 #define SERVICE_UUID           generateRandomUUID() + "0"  // UART service UUID
-#define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
-#define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
+#define CHARACTERISTIC_UUID_RX "6E400001-B5A3-F393-E0A9-E50E24DCCA9E" //write
+#define CHARACTERISTIC_UUID_TX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E" //transfer
+#define CHARACTERISTIC_UUID_TRX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E" //read
 
 class MyServerCallbacks : public BLEServerCallbacks {
   void onConnect(BLEServer *pServer) {
@@ -188,9 +190,11 @@ void setup() {
   BLEService *pService = pServer->createService(SERVICE_UUID);
 
   // Create a BLE Characteristic
-  pTxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_TX, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY);
+  pTxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_TX,BLECharacteristic::PROPERTY_NOTIFY);
+  pTRxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_TRX,BLECharacteristic::PROPERTY_READ);
 
   pTxCharacteristic->addDescriptor(new BLE2902());
+  pTRxCharacteristic->addDescriptor(new BLE2902());
 
   BLECharacteristic *pRxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
 
@@ -266,6 +270,8 @@ void loop() {
     // Prepare the JSON formatted string
     String jsonString = String("{\"sensor\":") + pressureValue + ",\"switch\":" + pressCount + "}";
     //Serial.println(jsonString);
+
+    pTRxCharacteristic->setValue(jsonString.c_str());
 
     if (sendMode == 0) {
       pTxCharacteristic->setValue(jsonString.c_str());
