@@ -76,17 +76,20 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
       }
       else{
         _connectCount += increment ? 1 : -1;
+        final connectDevices = ref.read(connectedDevicesProvider.notifier);
+        int deviceIndex = connectDevices.getIndex(device) + 1;
+
         if (increment) {
-          final connectDevices = ref.read(connectedDevicesProvider.notifier);
           connectDevices.addDevice(device);
-          int deviceIndex = connectDevices.getIndex(device);
+          debugPrint("connectDevices: $connectDevices");  
+          debugPrint("Device Index: $deviceIndex");
           writeColor(device, deviceIndex, 1); // 点灯
         } else {
-          final connectDevices = ref.read(connectedDevicesProvider.notifier);
           connectDevices.removeDevice(device);
         }
         Snackbar.show(ABC.b, "現在 ${_connectCount}個接続しています", success: true);
         debugPrint("Connected Devices: ${ref.read(connectedDevicesProvider)}");
+
       }
       });
   }

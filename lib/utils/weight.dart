@@ -7,9 +7,10 @@ import 'dart:convert';
 import 'color.dart';
 
 
+const String resultCharacteristicUUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";  // writeのUUID
+const String buttonCharacteristicUUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";  // notifyのUUID
+const String weightCharacteristicUUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";  // readのUUID
 
-const String weightCharacteristicUUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";  // txのUUID
-const String resultCharacteristicUUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";  // rxのUUID
 
 // 受信したデータを蓄積するMap
 // key: <int>readcount, value: WeightModel
@@ -41,12 +42,11 @@ Future<void> setupBluetooth(List<BluetoothDevice> connectedDevices) async {
     for (BluetoothService service in services) {
       var characteristics = service.characteristics;
       for(BluetoothCharacteristic c in characteristics) {
-        if (c.uuid.toString() == weightCharacteristicUUID) {
+        if (c.uuid.toString() == buttonCharacteristicUUID) {
           final _buttonSubscription = c.onValueReceived.listen((value) {
             var decodedValue = jsonDecode(utf8.decode(value)) as Map<String, dynamic>; // JSONデータをデコード
             debugPrint('device: ${device.remoteId}, weight: ${decodedValue["sensor"]}, switch: ${decodedValue["switch"]}');
-
-            // onMoreDrink(decodeValue, device, connectedDevices);
+            onMoreDrink(decodedValue, device, connectedDevices);
           });
 
           device.cancelWhenDisconnected(_buttonSubscription);
@@ -71,6 +71,7 @@ Future<String>WeightRead(int readCount,List<BluetoothDevice> connectedDevices) a
         if (c.uuid.toString() == weightCharacteristicUUID) {
           var value = await c.read();
           var decodedValue = jsonDecode(utf8.decode(value)) as Map<String, dynamic>; // JSONデータをデコード
+          // var decodedValue = {"sensor": 666666, "switch": 0};
           results.add(WeightModel.fromJson(device.remoteId.toString(), decodedValue));
         }
       }
@@ -89,6 +90,8 @@ Future<String>WeightRead(int readCount,List<BluetoothDevice> connectedDevices) a
 
 Future<void> onMoreDrink(Map<String, dynamic> data , BluetoothDevice device, List<BluetoothDevice> connectedDevices) async {
 
+  debugPrint("onMoreDrink: $data🖐️");
+
   int deviceIndex = connectedDevices.indexOf(device);
 
   if (data["switch"] == 0) {
@@ -97,13 +100,19 @@ Future<void> onMoreDrink(Map<String, dynamic> data , BluetoothDevice device, Lis
 
   List<WeightModel> previousData = weightData["0"]!;
 
+  for (WeightModel result in previousData) {
+    debugPrint('previous...device: ${result.deviceId}, weight: ${result.data["sensor"]}, switch: ${result.data["switch"]}');
+  }
+    debugPrint("deviceID; ${device.remoteId}");
+
+
   if(data["switch"] % 2 == 1) {
     // 1回目のボタンpush: 差分を計算してtotalweightDataに保存
     int deviceIndex = connectedDevices.indexOf(device);
     await writeColor(device, deviceIndex, 2);
 
     for (WeightModel previous in previousData) {
-      if (device.remoteId == previous.deviceId) {
+      if (device.remoteId.toString() == previous.deviceId) {
         int difference = (previous.data["sensor"] - data["sensor"]).abs();
         String key = device.remoteId.toString();
         if (totalweightData.containsKey(key)) {
