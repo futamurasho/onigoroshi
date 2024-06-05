@@ -90,8 +90,6 @@ Future<String>WeightRead(int readCount,List<BluetoothDevice> connectedDevices) a
 
 Future<void> onMoreDrink(Map<String, dynamic> data , BluetoothDevice device, List<BluetoothDevice> connectedDevices) async {
 
-  debugPrint("onMoreDrink: $data🖐️");
-
   int deviceIndex = connectedDevices.indexOf(device);
 
   if (data["switch"] == 0) {
@@ -99,11 +97,6 @@ Future<void> onMoreDrink(Map<String, dynamic> data , BluetoothDevice device, Lis
   }
 
   List<WeightModel> previousData = weightData["0"]!;
-
-  for (WeightModel result in previousData) {
-    debugPrint('previous...device: ${result.deviceId}, weight: ${result.data["sensor"]}, switch: ${result.data["switch"]}');
-  }
-    debugPrint("deviceID; ${device.remoteId}");
 
 
   if(data["switch"] % 2 == 1) {
@@ -137,8 +130,6 @@ Future<void> onMoreDrink(Map<String, dynamic> data , BluetoothDevice device, Lis
 
   
 }
-
-
 
 
 // 最小のデバイスに色を書き込む関数
@@ -199,4 +190,14 @@ Future<String> getMinWeightDevice(List<BluetoothDevice> connectedDevices) async 
   final color = await writeToMinDevice(minDifferenceDevice, connectedDevices);
 
   return color;
+}
+
+
+Future<void> clearData(List<BluetoothDevice> connectedDevices){
+  weightData.clear();
+  totalweightData.clear();
+  for (BluetoothDevice device in connectedDevices) {
+    writeColor(device, connectedDevices.indexOf(device), 0);
+  }
+  return Future.value();
 }

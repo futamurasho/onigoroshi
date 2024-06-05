@@ -176,6 +176,7 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
                 children: <Widget>[
                   ElevatedButton(
                     onPressed: (){
+                      clearData(ref.read(connectedDevicesProvider));
                     Navigator.push(
                       context, MaterialPageRoute(
                         builder: (context) => const SelectPage(),));},
@@ -201,6 +202,7 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
                   ),
                   ElevatedButton(
                     onPressed: (){
+                      clearData(ref.read(connectedDevicesProvider));
                     Navigator.push(
                       context, MaterialPageRoute(
                         builder: (context) => StartPage(

@@ -79,6 +79,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
                 children: <Widget>[
                   ElevatedButton(
                     onPressed: (){
+                      clearData(ref.read(connectedDevicesProvider));
                     Navigator.push(
                       context, MaterialPageRoute(
                         builder: (context) => const SelectPage(),));},
@@ -104,6 +105,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
                   ),
                   ElevatedButton(
                     onPressed: (){
+                      clearData(ref.read(connectedDevicesProvider));
                     Navigator.push(
                       context, MaterialPageRoute(
                         builder: (context) => StartPage(
