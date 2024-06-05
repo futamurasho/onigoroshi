@@ -90,6 +90,8 @@ Future<String>WeightRead(int readCount,List<BluetoothDevice> connectedDevices) a
 
 Future<void> onMoreDrink(Map<String, dynamic> data , BluetoothDevice device, List<BluetoothDevice> connectedDevices) async {
 
+  debugPrint("onMoreDrink: $data🖐️");
+
   int deviceIndex = connectedDevices.indexOf(device);
 
   if (data["switch"] == 0) {
@@ -98,13 +100,19 @@ Future<void> onMoreDrink(Map<String, dynamic> data , BluetoothDevice device, Lis
 
   List<WeightModel> previousData = weightData["0"]!;
 
+  for (WeightModel result in previousData) {
+    debugPrint('previous...device: ${result.deviceId}, weight: ${result.data["sensor"]}, switch: ${result.data["switch"]}');
+  }
+    debugPrint("deviceID; ${device.remoteId}");
+
+
   if(data["switch"] % 2 == 1) {
     // 1回目のボタンpush: 差分を計算してtotalweightDataに保存
     int deviceIndex = connectedDevices.indexOf(device);
     await writeColor(device, deviceIndex, 2);
 
     for (WeightModel previous in previousData) {
-      if (device.remoteId == previous.deviceId) {
+      if (device.remoteId.toString() == previous.deviceId) {
         int difference = (previous.data["sensor"] - data["sensor"]).abs();
         String key = device.remoteId.toString();
         if (totalweightData.containsKey(key)) {

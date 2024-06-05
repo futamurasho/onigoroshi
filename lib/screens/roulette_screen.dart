@@ -34,11 +34,7 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
   late int music_id;
   late List<dynamic> Punishment;
   late bool game;
-  //デバッグ用
-  final Future<String> _calculation = Future<String>.delayed(
-    const Duration(seconds: 2),
-    () => 'Data Loaded',
-    );
+
 
   bool _clockwise = true;
 
@@ -73,8 +69,7 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
             )
         ),
         child: FutureBuilder<String>(
-        //future: _minweightdevice,
-        future: _calculation,
+        future: _minweightdevice,
         builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
           List<Widget> children;
           if (snapshot.hasData) { // 値が存在する場合の処理
@@ -83,7 +78,7 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
                 height: 100,
               ),
                Text(
-                  'この期間一番飲んでいなかった人は\n${snapshot.data}でした！',
+                  'この期間一番飲んでいなかった人は\n${snapshot.data}\nのコースターの人でした！',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                                 fontFamily:'Yuji',
