@@ -308,6 +308,11 @@ void loop() {
     Serial.println("start advertising");
     oldDeviceConnected = deviceConnected;
 
+    //initialize
+    switchState = 0;
+    lastSwitchState = 0;
+    pressCount = 0;
+    pressureValue = 0;
     pixels.clear();
     pixels.show();
     lightMode = 0;
