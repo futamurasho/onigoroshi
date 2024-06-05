@@ -37,8 +37,11 @@ class _StartPageState extends ConsumerState<StartPage> {
   void initState(){
     _time=DateTime.utc(0,0,0);
     super.initState();
-    _weightReadFuture = WeightRead(0,ref.read(connectedDevicesProvider));
+    final connectedDevices = ref.read(connectedDevicesProvider);
+    _weightReadFuture = WeightRead(0, connectedDevices);
+    setupBluetooth(connectedDevices);
   }
+
 
   @override
   Widget build(BuildContext context) {

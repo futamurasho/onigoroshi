@@ -46,7 +46,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
           if (snapshot.hasData) { // 値が存在する場合の処理
             children = <Widget>[
                Text(
-                  'この期間一番飲んでいなかった人は${snapshot.data}でした！',
+                  'この期間一番飲んでいなかったのは、${snapshot.data}のコースターの人でした！',
                   style: TextStyle(
                                 fontFamily:'Yuji',
                                 fontSize: 30,
