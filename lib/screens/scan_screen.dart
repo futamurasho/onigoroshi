@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/snackbar.dart';
+import '../utils/color.dart';
 import '../widgets/scan_result_tile.dart';
 import 'select_screen.dart';
 
@@ -15,6 +16,9 @@ class ConnectedDevicesNotifier extends StateNotifier<List<BluetoothDevice>> {
   }
   void removeDevice(BluetoothDevice device) {
     state = state.where((d) => d.remoteId != device.remoteId).toList();
+  }
+  int getIndex(BluetoothDevice device) {
+    return state.indexOf(device);
   }
 }
 
@@ -64,26 +68,27 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     super.dispose();
   }
 
-  final connectionSnackBar = SnackBar(
-    content: const Text("Normal SnackBar!!"),
-    duration: const Duration(seconds: 10),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-    margin: const EdgeInsets.only(left: 23, right: 23, bottom: 23),
-    behavior: SnackBarBehavior.floating,
-  );
-
   void updateConnectCount(BluetoothDevice device, bool increment) {
     debugPrint("updateConnectCount: $increment");
     setState(() {
-      _connectCount += increment ? 1 : -1;
-      if (increment) {
-        ref.read(connectedDevicesProvider.notifier).addDevice(device);
-      } else {
-        ref.read(connectedDevicesProvider.notifier).removeDevice(device);
+      if (_connectCount == 0 && increment == false) {
+        return;
       }
-    });
-    Snackbar.show(ABC.b, "現在 ${_connectCount}個接続しています", success: true);
-    debugPrint("Connected Devices: ${ref.read(connectedDevicesProvider)}");
+      else{
+        _connectCount += increment ? 1 : -1;
+        if (increment) {
+          final connectDevices = ref.read(connectedDevicesProvider.notifier);
+          connectDevices.addDevice(device);
+          int deviceIndex = connectDevices.getIndex(device);
+          writeColor(device, deviceIndex, 1); // 点灯
+        } else {
+          final connectDevices = ref.read(connectedDevicesProvider.notifier);
+          connectDevices.removeDevice(device);
+        }
+        Snackbar.show(ABC.b, "現在 ${_connectCount}個接続しています", success: true);
+        debugPrint("Connected Devices: ${ref.read(connectedDevicesProvider)}");
+      }
+      });
   }
 
   // ゲーム設定ボタンが押されたときの処理
@@ -96,20 +101,23 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     }
     else{
       for (BluetoothDevice device in connectedDevices) {
-      debugPrint('Device name: ${device.platformName}');
-      device.discoverServices().then((services) {
-        for (BluetoothService service in services) {
-          debugPrint('Service UUID: ${service.uuid}');
-          // Get all characteristics
-          for (BluetoothCharacteristic characteristic in service.characteristics) {
-            debugPrint('Characteristic UUID: ${characteristic.uuid}');
-            debugPrint('Characteristic properties: ${characteristic.properties}');
+        debugPrint('Device name: ${device.platformName}');
+        int deviceIndex = connectedDevices.indexOf(device);
+        writeColor(device, deviceIndex, 0); // 消灯
+        
+        device.discoverServices().then((services) {
+          for (BluetoothService service in services) {
+            debugPrint('Service UUID: ${service.uuid}');
+            // Get all characteristics
+            for (BluetoothCharacteristic characteristic in service.characteristics) {
+              debugPrint('Characteristic UUID: ${characteristic.uuid}');
+              debugPrint('Characteristic properties: ${characteristic.properties}');
+              }
             }
-          }
-        }).catchError((e) {
-          Snackbar.show(ABC.b, prettyException("Discover Services Error:", e), success: false);
-          return;
-        });
+          }).catchError((e) {
+            Snackbar.show(ABC.b, prettyException("Discover Services Error:", e), success: false);
+            return;
+          });
       }
       onStopPressed();
       Navigator.push(context, MaterialPageRoute(builder: (_) => const SelectPage()));
@@ -217,7 +225,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
   List<Widget> _buildScanResultTiles(BuildContext context) {
     return _scanResults
         .where((r) => r.device.platformName != '')  // Filter out devices with no name 
-         .where((r) => r.device.platformName.contains('ONIGOROSHI'))
+        .where((r) => r.device.platformName.contains('ONIGOROSHI'))
         .map(
           (r) => ScanResultTile(
             result: r,

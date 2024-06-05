@@ -72,7 +72,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
                 height: 100,
               ),
                Text(
-                  'この期間一番飲んでいなかった人は\n${snapshot.data}でした！',
+                  'この期間一番飲んでいなかった人は\n${snapshot.data}のコースターの人でした！',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                                 fontFamily:'Yuji',

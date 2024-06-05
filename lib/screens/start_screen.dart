@@ -44,13 +44,16 @@ class _StartPageState extends ConsumerState<StartPage> {
   void initState(){
     _time=DateTime.utc(0,0,0);
     super.initState();
+    final connectedDevices = ref.read(connectedDevicesProvider);
     minutes=widget.minutes;
     music_id=widget.music_id;
     Punishment=widget.Punishment;
     game=widget.game;
 
-    _weightReadFuture = WeightRead(0,ref.read(connectedDevicesProvider));
+    _weightReadFuture = WeightRead(0, connectedDevices);
+    setupBluetooth(connectedDevices);
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -209,7 +212,7 @@ class _StartPageState extends ConsumerState<StartPage> {
   }
 
   void change(int tmp){
-    _stopcounter = 3;
+    _stopcounter = 10;
     // _stopcounter = Random().nextInt(60*tmp-20*tmp+1)+20*tmp;
   }
   }

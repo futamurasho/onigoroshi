@@ -26,6 +26,10 @@ class _ScanResultTileState extends State<ScanResultTile> {
 
     _connectionStateSubscription = widget.result.device.connectionState.listen((state) {
       _connectionState = state;
+      if (state == BluetoothConnectionState.disconnected) {
+        print("Device ${widget.result.device.remoteId} has disconnected.");
+        widget.updateConnectCount?.call(widget.result.device,false);
+      }
       if (mounted) {
         setState(() {});
       }
@@ -55,7 +59,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
         if (mounted) {
           setState(() {
             _connectionState = BluetoothConnectionState.disconnected;
-            widget.updateConnectCount?.call(device,false);
+            // widget.updateConnectCount?.call(device,false);
           });
         }
       }).catchError((e) {
