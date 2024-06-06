@@ -30,7 +30,7 @@ class RoulettePage extends ConsumerStatefulWidget {
 
 class _RoulettePageState extends ConsumerState<RoulettePage>
     with SingleTickerProviderStateMixin {
-  late Future<String> _minweightdevice;
+  late Future<Map<String,dynamic>> _minweightdevice;
   late RouletteController _controller;
   late int minutes;
   late int music_id;
@@ -78,15 +78,15 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
             fit: BoxFit.fill
           )
         ),
-        child: FutureBuilder<String>(
+        child: FutureBuilder<Map<String,dynamic>>(
           future: _minweightdevice,
-          builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+          builder: (BuildContext context, AsyncSnapshot<Map<String,dynamic>> snapshot) {
             List<Widget> children;
             if (snapshot.hasData) { // 値が存在する場合の処理
               children = <Widget>[
                 Container(height: 100),
                 Text(
-                  'この期間一番飲んでいなかった人は\n${snapshot.data}\nのコースターの人でした！',
+                  'この期間一番飲んでいなかった人は\n${snapshot.data!["color"]}\nのコースターの人でした！',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: 'Yuji',

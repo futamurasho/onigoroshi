@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'color.dart';
 
 
+
 const String resultCharacteristicUUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";  // writeのUUID
 const String buttonCharacteristicUUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";  // notifyのUUID
 const String weightCharacteristicUUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";  // readのUUID
@@ -161,7 +162,7 @@ Future<String> writeToMinDevice(String deviceID, List<BluetoothDevice> connected
 }
 
 // 差分を計算して最小のデバイスを見つける関数
-Future<String> getMinWeightDevice(List<BluetoothDevice> connectedDevices) async {
+Future<Map<String,String>> getMinWeightDevice(List<BluetoothDevice> connectedDevices) async {
   await WeightRead(1,connectedDevices);
   debugPrint('weightData: $weightData');
 
@@ -208,10 +209,87 @@ Future<String> getMinWeightDevice(List<BluetoothDevice> connectedDevices) async 
 
   final color = await writeToMinDevice(minDifferenceDevice, connectedDevices);
 
-  return color;
+  return {"color": color, "mindevice": minDifferenceDevice};
 }
 
 
+Future<String> callstop(String deviceID, List<BluetoothDevice> connectedDevices) async {
+  // コールならす
+  const stop_difference = 10000;
+  const limit = 684314;
+  const bias = 300;
+  WeightModel? previousWeightModel;
+  bool stop = false;
+
+  if (deviceID == "") {
+    throw Exception("bluetoothの接続が切れました");
+  }
+
+  BluetoothDevice mindevice = connectedDevices.firstWhere((d) => d.remoteId.toString() == deviceID);
+
+  List<WeightModel> previousData = weightData["1"]!;
+
+  for (WeightModel previous in previousData) {
+    if (previous.deviceId == mindevice.remoteId.toString()) {
+      previousWeightModel = previous;
+      break;
+    }
+  }
+
+  if (previousWeightModel == null) {
+    throw Exception("bluetoothの接続が切れました");
+  }
+
+  int previousWeight = previousWeightModel.data["sensor"];
+
+  while (!stop) {
+    await Future.delayed(Duration(seconds: 1));
+    try {
+      List<BluetoothService> services = await mindevice.discoverServices();
+      for (BluetoothService service in services) {
+        var characteristics = service.characteristics;
+        for (BluetoothCharacteristic c in characteristics) {
+          if (c.uuid.toString() == weightCharacteristicUUID) {
+            try {
+              var value = await c.read();
+              var decodedValue = jsonDecode(utf8.decode(value)) as Map<String, dynamic>; // JSONデータをデコード
+              int currentWeight = decodedValue["sensor"];
+              if (currentWeight >= (limit - bias) && currentWeight <= (limit + bias)) {
+                continue;
+              }
+              if ((previousWeight - currentWeight).abs() > stop_difference) {
+                stop = true;
+                break;
+              }
+            } catch (e) {
+              debugPrint('read error: $e');
+              throw Exception("bluetooth通信にエラーが発生しました(read)");
+            }
+          }
+        }
+        if (stop) break;
+      }
+    } catch (e) {
+      debugPrint('discoverServices error: $e');
+      throw Exception("bluetooth通信にエラーが発生しました(discoverServices)");
+    }
+
+    if (stop) {
+      for (BluetoothDevice device in connectedDevices) {
+        await writeColor(device, connectedDevices.indexOf(device), 0);
+      }
+
+      // コール止める
+      return "Stopped due to significant weight change.";
+    }
+  }
+
+  return "Stopped without significant weight change.";
+}
+
+
+
+// データをクリアする関数
 Future<void> clearData(List<BluetoothDevice> connectedDevices){
   weightData.clear();
   totalweightData.clear();
