@@ -187,7 +187,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
                                   MaterialPageRoute(
                                     builder: (context) => StartPage(
                                       minutes: minutes,
-                                      music_id: music_id,
+                                      music_data: music_data,
                                       Punishment: Punishment,
                                       game: game,
                                     ),
