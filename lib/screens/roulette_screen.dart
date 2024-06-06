@@ -11,13 +11,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class RoulettePage extends ConsumerStatefulWidget {
   final int minutes;
-  final int music_id;
+  final String music_data;
   final List<dynamic> Punishment;
   final bool game;
   const RoulettePage({
     super.key,
     required this.minutes,
-    required this.music_id,
+    required this.music_data,
     required this.Punishment,
     required this.game
     });
@@ -31,7 +31,7 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
   late Future<String> _minweightdevice;
   late RouletteController _controller;
   late int minutes;
-  late int music_id;
+  late String music_data;
   late List<dynamic> Punishment;
   late bool game;
   //デバッグ用
@@ -56,7 +56,7 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
 
     super.initState();
     minutes=widget.minutes;
-    music_id=widget.music_id;
+    music_data=widget.music_data;
     Punishment=widget.Punishment;
     game=widget.game;
     _minweightdevice = getMinWeightDevice(ref.read(connectedDevicesProvider));
@@ -80,10 +80,10 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
           if (snapshot.hasData) { // 値が存在する場合の処理
             children = <Widget>[
               Container(
-                height: 100,
+                height: 80,
               ),
                Text(
-                  'この期間一番飲んでいなかった人は\n${snapshot.data}でした！',
+                  'この間一番飲んでいなかった人は\n${snapshot.data}\nのコースターの人でした！',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                                 fontFamily:'Yuji',
@@ -92,7 +92,7 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
                                 )
               ),
               Container(
-                height: 20,
+                height: 15,
               ),
               ElevatedButton(
               onPressed: () => _controller.rollTo(
@@ -118,15 +118,15 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
                )
                ),
                Container(
-                height: 40,
+                height: 20,
                ),
                //ルーレット
                Stack(
                 alignment: Alignment.topCenter,
                 children: [
                   SizedBox(
-                    width: 260,
-                    height: 260,
+                    width: 230,
+                    height: 230,
                     child: Padding(
                       padding: const EdgeInsets.only(top: 30),
                       child: Roulette(
@@ -147,7 +147,7 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
                 ],
               ),
               Container(
-                height: 50,
+                height: 30,
               ),
               Text('1:${widget.Punishment[0].name}',
               style: TextStyle(
@@ -174,7 +174,7 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
                       color: Colors.black
                   )),
               Container(
-                height: 30,
+                height: 20,
               ),
                Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -210,7 +210,7 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
                       context, MaterialPageRoute(
                         builder: (context) => StartPage(
                           minutes: minutes,
-                          music_id: music_id,
+                          music_data: music_data,
                           Punishment: Punishment,
                           game: game,
                           ))
