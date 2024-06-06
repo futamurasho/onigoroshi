@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
+import 'package:onigoroshi_demo/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -264,7 +265,11 @@ Widget build(BuildContext context) {
         leading: IconButton(
           iconSize: 40.0,
           icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop()  
+          onPressed: () => Navigator.push(
+                      context, 
+                      MaterialPageRoute(
+                        builder: (context) => MyHomePage(),
+                  ))
           ),
         ),
         extendBodyBehindAppBar: true,
