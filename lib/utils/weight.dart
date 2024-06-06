@@ -215,6 +215,11 @@ Future<Map<String,String>> getMinWeightDevice(List<BluetoothDevice> connectedDev
 
 Future<String> callstop(String deviceID, List<BluetoothDevice> connectedDevices) async {
   // コールならす
+  /* setState(() {
+      playing=!playing;
+    });
+    _playMusic(widget.music_data,playing);
+  }, */
   const stop_difference = 10000;
   const limit = 684314;
   const bias = 300;

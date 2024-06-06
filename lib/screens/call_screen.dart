@@ -6,18 +6,20 @@ import 'package:onigoroshi_demo/screens/select_screen.dart';
 import 'scan_screen.dart';
 import '../utils/weight.dart';
 import '../widgets/error_tile.dart';
+import 'package:audioplayers/audioplayers.dart';
+
 
 //タイマーがランダムに止まる
 class ResultPage extends ConsumerStatefulWidget {
   final int minutes;
-  final int music_id;
+  final String music_data;
   final List<dynamic> Punishment;
   final bool game;
 
   const ResultPage({
     super.key,
     required this.minutes,
-    required this.music_id,
+    required this.music_data,
     required this.Punishment,
     required this.game
   });
@@ -31,17 +33,30 @@ class _ResultPageState extends ConsumerState<ResultPage> {
   bool stopflag = true;
   late Future<Map<String,String>> _minweightdevice;
   late int minutes;
-  late int music_id;
+  late String music_data;
   late List<dynamic> Punishment;
   late bool game;
+  final player=AudioPlayer();
+  bool playing=false;
+
+  //音楽流す
+  void _playMusic(String data,bool play) {
+    if (play) {
+      player.play(AssetSource(data));
+    } else {
+      player.pause();
+    }
+  }
+  
+
 
   @override
   void initState() {
     super.initState();
-    minutes = widget.minutes;
-    music_id = widget.music_id;
-    Punishment = widget.Punishment;
-    game = widget.game;
+    minutes=widget.minutes;
+    music_data=widget.music_data;
+    Punishment=widget.Punishment;
+    game=widget.game;
     _minweightdevice = getMinWeightDevice(ref.read(connectedDevicesProvider));
   }
 

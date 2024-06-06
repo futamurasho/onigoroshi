@@ -24,15 +24,14 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'test'),//test代入
+      home: const MyHomePage(),//test代入
       navigatorObservers: [BluetoothAdapterStateObserver()],
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});//初期化に必要
-  final String title;//変数widget.titleでアクセスできる
+  const MyHomePage({super.key});//初期化に必要//変数widget.titleでアクセスできる
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
@@ -126,7 +125,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(
                     builder: (context) => BluetoothOnTile(),
                   ));
-      },
+      },  
     ),
       ),
     );
