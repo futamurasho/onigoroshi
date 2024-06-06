@@ -34,6 +34,7 @@ class ScanScreen extends ConsumerStatefulWidget {
 }
 
 class _ScanScreenState extends ConsumerState<ScanScreen> {
+  GlobalKey projectStreamGlobalKey = GlobalKey< _ScanScreenState>();
   List<ScanResult> _scanResults = [];
   bool _isScanning = false;
   int _connectCount = 0;

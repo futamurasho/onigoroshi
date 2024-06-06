@@ -5,6 +5,7 @@ import 'package:onigoroshi_demo/screens/start_screen.dart';
 import 'package:onigoroshi_demo/screens/select_screen.dart';
 import 'scan_screen.dart';
 import '../utils/weight.dart';
+import '../widgets/error_tile.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 
@@ -14,22 +15,23 @@ class ResultPage extends ConsumerStatefulWidget {
   final String music_data;
   final List<dynamic> Punishment;
   final bool game;
+
   const ResultPage({
     super.key,
     required this.minutes,
     required this.music_data,
     required this.Punishment,
     required this.game
-    });
+  });
+
   @override
   ConsumerState<ResultPage> createState() => _ResultPageState();
 }
 
 class _ResultPageState extends ConsumerState<ResultPage> {
-  bool isVisible = true;//可視化のbool値
-  //int _counter = 0;//初期値
+  bool isVisible = true; // 可視化のbool値
   bool stopflag = true;
-  late Future<String> _minweightdevice;
+  late Future<Map<String,String>> _minweightdevice;
   late int minutes;
   late String music_data;
   late List<dynamic> Punishment;
@@ -46,18 +48,10 @@ class _ResultPageState extends ConsumerState<ResultPage> {
     }
   }
   
-  //デバッグ用
-  final Future<String> _calculation = Future<String>.delayed(
-    const Duration(seconds: 2),
-    () => 'Data Loaded',
-    );
-  //Timer? _timer;
-  //DateTime? _time;
-  //late final int _stopcounter;//ここを乱数にする
+
 
   @override
-  void initState(){
-    //_time=DateTime.utc(0,0,0);
+  void initState() {
     super.initState();
     minutes=widget.minutes;
     music_data=widget.music_data;
@@ -68,168 +62,189 @@ class _ResultPageState extends ConsumerState<ResultPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      body:Container(
+      body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('images/background_2.jpeg'),
-            fit: BoxFit.fill
-            )
+            fit: BoxFit.fill,
+          ),
         ),
-        child: FutureBuilder<String>(
-        future: _minweightdevice,
-        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-          List<Widget> children;
-          if (snapshot.hasData) { // 値が存在する場合の処理
-            children = <Widget>[
-               Container(
-                height: 100,
-              ),
-               Text(
-                  'この期間一番飲んでいなかった人は\n${snapshot.data}\nのコースターの人でした！',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                                fontFamily:'Yuji',
-                                fontSize: 24,
-                                color: Colors.black
-                                )
-              ),
-              Container(
-                height: 20,
-              ),
-              ElevatedButton(
-                    onPressed:(){
-                      setState(() {
-                        playing=!playing;
-                      });
-                      _playMusic(widget.music_data,playing);
-                    },
-                    child: Text(playing ? 'とめる': 'コール',
+        child: FutureBuilder<Map<String, String>>(
+          future: _minweightdevice,
+          builder: (BuildContext context, AsyncSnapshot<Map<String, String>> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text(
+                      '計測中',
                       style: TextStyle(
-                        fontFamily:'Yuji',
+                        fontFamily: 'Yuji',
                         fontSize: 30,
-                        color: Colors.black
-                        )
-                        ),
-                        style:ElevatedButton.styleFrom(
-                          elevation: 0,
-                          backgroundColor: Colors.transparent,
-                          side: BorderSide(
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: errorTile(context, snapshot, ref),
+                ),
+              );
+            } else if (snapshot.hasData) {
+              return FutureBuilder<String>(
+                future: callstop(snapshot.data?["mindevice"] ?? "", ref.read(connectedDevicesProvider)),
+                builder: (BuildContext context, AsyncSnapshot<String> stopSnapshot) {
+                  if (stopSnapshot.connectionState == ConnectionState.waiting) {
+                    return Column(
+                      children: <Widget>[
+                        SizedBox(height: 100),
+                        Text(
+                          'この期間一番飲んでいなかった人は\n${snapshot.data?["color"]}\nのコースターの人でした！',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: 'Yuji',
+                            fontSize: 25,
                             color: Colors.black,
-                            width:3,
-                            )
-                            )
-                  ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  ElevatedButton(
-                    onPressed: (){
-                      clearData(ref.read(connectedDevicesProvider));
-                      player.stop();
-                    Navigator.push(
-                      context, MaterialPageRoute(
-                        builder: (context) => const SelectPage(),));},
-                    child: Text(
-                      '再設定して\n遊ぶ',
+                          ),
+                        ),
+                        SizedBox(height: 100),
+                        Text(
+                          'コールを止めるためには飲んでください〜〜',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: 'Yuji',
+                            fontSize: 25,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    );
+                  } else if (stopSnapshot.hasError) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children : errorTile(context, snapshot, ref),
+                      ),
+                    );
+                  } else if (stopSnapshot.hasData) {
+                    return Column(
+                      children: <Widget>[
+                        SizedBox(height: 100),
+                        Text(
+                          'ナイスファイト！！！',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: 'Yuji',
+                            fontSize: 25,
+                            color: Colors.black,
+                          ),
+                        ),
+                        SizedBox(height: 600),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            ElevatedButton(
+                              onPressed: () {
+                                clearData(ref.read(connectedDevicesProvider));
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const SelectPage(),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                '再設定して\n遊ぶ',
+                                style: TextStyle(
+                                  fontFamily: 'Yuji',
+                                  fontSize: 30,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                elevation: 0,
+                                backgroundColor: Colors.transparent,
+                                side: BorderSide(
+                                  color: Colors.black,
+                                  width: 3,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            ElevatedButton(
+                              onPressed: () {
+                                clearData(ref.read(connectedDevicesProvider));
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => StartPage(
+                                      minutes: minutes,
+                                      music_data: music_data,
+                                      Punishment: Punishment,
+                                      game: game,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                'そのまま\n遊ぶ',
+                                style: TextStyle(
+                                  fontFamily: 'Yuji',
+                                  fontSize: 30,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                elevation: 0,
+                                backgroundColor: Colors.transparent,
+                                side: BorderSide(
+                                  color: Colors.black,
+                                  width: 3,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  } else {
+                    return Column(
+                    );
+                  }
+                },
+              );
+            } else {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text(
+                      '計測中',
                       style: TextStyle(
-                        fontFamily:'Yuji',
+                        fontFamily: 'Yuji',
                         fontSize: 30,
-                        color: Colors.black
-                        )
-                        ),
-                        style:ElevatedButton.styleFrom(
-                          elevation: 0,
-                          backgroundColor: Colors.transparent,
-                          side: BorderSide(
-                            color: Colors.black,
-                            width:3,
-                            )
-                            )
-                  ),
-                  Container(
-                    width: 10,
-                  ),
-                  ElevatedButton(
-                    onPressed: (){
-                      clearData(ref.read(connectedDevicesProvider));
-                      player.stop();
-                    Navigator.push(
-                      context, MaterialPageRoute(
-                        builder: (context) => StartPage(
-                          minutes: minutes,
-                          music_data: music_data,
-                          Punishment: Punishment,
-                          game: game,
-                          ))
-                          );
-                          },
-                    child: Text(
-                      'そのまま\n遊ぶ',
-                      style: TextStyle(
-                        fontFamily:'Yuji',
-                        fontSize: 30,
-                        color: Colors.black
-                        )
-                        ),
-                        style:ElevatedButton.styleFrom(
-                          elevation: 0,
-                          backgroundColor: Colors.transparent,
-                          side: BorderSide(
-                            color: Colors.black,
-                            width:3,
-                            )
-                            )
-                  ),
-                ],
-               ),
-            ];
-          } else if (snapshot.hasError) {// エラーが発生した場合の処理
-            children = <Widget>[
-              const Icon(
-                Icons.error_outline,
-                color: Colors.red,
-                size: 60,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text('Error: ${snapshot.error}'),
-              ),
-            ];
-          } else { // 値が存在しない場合の処理
-            children = <Widget>[
-              Container(
-                height: 400,
-              ),
-              SizedBox(
-                width: 60,
-                height: 60,
-                child: CircularProgressIndicator(),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 16),
-                child: Text(
-                  '計測中',
-                  style: TextStyle(
-                      fontFamily:'Yuji',
-                      fontSize: 30,
-                      color: Colors.black
-                  )
-                  ),
-              ),
-            ];
-          }
-          return Center(
-            child: Column(
-              children: children,
-            ),
-          );
-        },
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+          },
+        ),
       ),
-      ),
-   );
+    );
   }
-
-  
 }
+
+
