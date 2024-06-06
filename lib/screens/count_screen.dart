@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:onigoroshi_demo/screens/call_screen.dart';
 import 'package:onigoroshi_demo/screens/roulette_screen.dart';
+import 'package:audioplayers/audioplayers.dart';
 class CountPage extends StatefulWidget {
   final int minutes;
-  final int music_id;
+  final String music_data;
   final List<dynamic> Punishment;
   final bool game;
   const CountPage({
     super.key,
     required this.minutes,
-    required this.music_id,
+    required this.music_data,
     required this.Punishment,
     required this.game});
   @override
@@ -21,8 +22,9 @@ class _CountPageState extends State<CountPage> {
   int _counter = 3;//初期値
   late int minutes;
   late List<dynamic> Punishment;
-  late int music_id;
+  late String music_data;
   late bool game;
+  final player=AudioPlayer();
   //ページの分岐
   void screenselect(bool game){
     //罰ゲーム選択した場合
@@ -31,7 +33,7 @@ class _CountPageState extends State<CountPage> {
               context, MaterialPageRoute(
               builder: (context) => RoulettePage(
                 minutes: minutes,
-                music_id: music_id,
+                music_data: music_data,
                 Punishment: Punishment,
                 game: game,
               )));
@@ -42,7 +44,7 @@ class _CountPageState extends State<CountPage> {
               context, MaterialPageRoute(
               builder: (context) => ResultPage(
                 minutes: minutes,
-                music_id: music_id,
+                music_data: music_data,
                 Punishment: Punishment,
                 game: game,
               )));
@@ -54,8 +56,9 @@ class _CountPageState extends State<CountPage> {
     super.initState();
     minutes=widget.minutes;
     Punishment=widget.Punishment;
-    music_id=widget.music_id;
+    music_data=widget.music_data;
     game=widget.game;
+    player.play(AssetSource('Countdown-3.mp3'));
     Timer.periodic(
       const Duration(seconds: 1),
           (Timer timer) {
@@ -63,10 +66,14 @@ class _CountPageState extends State<CountPage> {
         setState(() {});
         if(_counter == 0){//カウントダウンが終了した時の処理
           timer.cancel();
-          screenselect(widget.game);
+          //screenselect(widget.game);
         }
       },
     );
+    player.onPlayerComplete.listen((event) { 
+      player.stop();
+      screenselect(widget.game);
+    });
   }
   @override
   Widget build(BuildContext context) {

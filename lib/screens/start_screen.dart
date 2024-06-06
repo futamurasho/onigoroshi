@@ -13,13 +13,13 @@ import '../widgets/error_tile.dart';
 
 class StartPage extends ConsumerStatefulWidget {
   final int minutes;
-  final int music_id;
+  final String music_data;
   final List<dynamic> Punishment;
   final bool game;
   const StartPage({
     super.key,
     required this.minutes,
-    required this.music_id,
+    required this.music_data,
     required this.Punishment,
     required this.game
    });
@@ -32,7 +32,7 @@ class _StartPageState extends ConsumerState<StartPage> {
   int _counter = 0;//初期値
   bool stopflag = true;
   late int minutes;
-  late int music_id;
+  late String music_data;
   late List<dynamic> Punishment;
   late bool game;
   Timer? _timer;
@@ -47,7 +47,7 @@ class _StartPageState extends ConsumerState<StartPage> {
     super.initState();
     final connectedDevices = ref.read(connectedDevicesProvider);
     minutes=widget.minutes;
-    music_id=widget.music_id;
+    music_data=widget.music_data;
     Punishment=widget.Punishment;
     game=widget.game;
 
@@ -114,7 +114,7 @@ class _StartPageState extends ConsumerState<StartPage> {
                                             context, MaterialPageRoute(
                                             builder: (context) => CountPage(
                                                minutes: minutes,
-                                               music_id: music_id,
+                                               music_data: music_data,
                                                Punishment: Punishment,
                                                game: game,
                                             )));

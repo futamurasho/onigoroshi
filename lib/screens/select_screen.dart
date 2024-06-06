@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:onigoroshi_demo/main.dart';
 import 'package:wheel_slider/wheel_slider.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'start_screen.dart';
@@ -26,10 +27,12 @@ class music {
   final int id;
   final String name;
   late bool pushed;
+  String data;
   music({
     required this.id,
     required this.name,
-    required this.pushed
+    required this.pushed,//falseで再生中、trueで停止中
+    required this.data
   });
 }
 
@@ -39,36 +42,51 @@ class _SelectPageState extends State<SelectPage> {
   int _nInitValue=5;
   int _nCurrentValue=5;
   bool isVisible=true;
-  int selectedindex=1;//選ばれた音楽のid
+  int selectedindex=0;//選ばれた音楽のid
   //ゲーム選択の変数
   var _gameselected=<int>{0};
-  var _game =0;
   //選択された罰ゲームのリスト
   List<dynamic> _selected=[];
   //音変数
   final player=AudioPlayer();
-  PlayerState? _playerState;
+  //どれが再生されているか
+  int currentSec = 0;
+  int maxSec = 1;
   //音楽設定
-  Future<void> _play()async{
-    await player.resume();
-    setState(() =>_playerState = PlayerState.playing);
+  void _playMusic(String data,bool play) {
+    if (!play) {
+      player.play(AssetSource(data));
+    } else {
+      player.pause();
+    }
   }
 
-  Future<void> _pause()async{
-    await player.pause();
-    setState(() =>_playerState = PlayerState.paused);
+  //一つの再生ボタンを押した時に他の再生ボタンを停止中にする=>他のmusicのpushedをtrueに変化させる
+  //引数が一つのmusicとmusicのリスト
+  void music_change(music m,List<music> m_list){
+    for(int i=0;i<m_list.length;i++){
+      if(i!=m.id){
+        m_list[i].pushed=true;
+      }
+    }
   }
-  //再生中かどうか
-  bool get isPlaying => _playerState == PlayerState.playing;
+
+  void music_reset(List<music> m_list){
+    for(int i=0;i<m_list.length;i++){
+      m_list[i].pushed=true;
+    }
+  }
+
 
 //セグメントボタンでのbool値切り替え
   void toggleShow(){
     isVisible = !isVisible;
   }
 
+//スナックバー一覧
   final snackBar_p = SnackBar(
       content: Text(
-        '罰ゲームを選択してください',
+        '罰ゲームを4つ選択してください',
         style: TextStyle(
           color: Colors.black,
           fontSize: 20,
@@ -90,27 +108,28 @@ class _SelectPageState extends State<SelectPage> {
         elevation: 0,
         backgroundColor: Colors.transparent,
   );
+  
   final _items=_punishments.map((e) => MultiSelectItem<Punishment>(e, e.name)).toList();
 
 //コール音一覧
   static List<music> _musics = [
-    music(id:1, name: '音楽1',pushed: true),
-    music(id:2, name: '音楽2',pushed: true),
-    music(id:3, name: '音楽3',pushed: true),
+    music(id:0, name: '音楽1',pushed: true,data: 'maou_08_burning_heart.mp3'),
+    music(id:1, name: '音楽2',pushed: true,data: 'maou_14_shining_star.mp3'),
+    music(id:2, name: '音楽3',pushed: true,data: 'maou_39_soleil.mp3'),
   ];
   
 //罰ゲーム一覧
   static List<Punishment> _punishments = [
-    Punishment(id: 1, name: "罰ゲーム１"),
-    Punishment(id: 2, name: "罰ゲーム２"),
-    Punishment(id: 3, name: "罰ゲーム３"),
-    Punishment(id: 4, name: "罰ゲーム４"),
-    Punishment(id: 5, name: "罰ゲーム５"),
-    Punishment(id: 6, name: "罰ゲーム６"),
+    Punishment(id: 0, name: "罰ゲーム１"),
+    Punishment(id: 1, name: "罰ゲーム２"),
+    Punishment(id: 2, name: "罰ゲーム３"),
+    Punishment(id: 3, name: "罰ゲーム４"),
+    Punishment(id: 4, name: "罰ゲーム５"),
+    Punishment(id: 5, name: "罰ゲーム６"),
   ];
 
 // コール音設定
-  Widget _menuItem(music music) {
+  Widget _menuItem(music music,List<music> list) {
     return Container(
       decoration: new BoxDecoration(
         border: new Border(bottom: BorderSide(width: 1.0, color: Colors.grey))
@@ -132,10 +151,10 @@ class _SelectPageState extends State<SelectPage> {
             IconButton(
               onPressed: () {
                 setState(() {
-                  music.pushed=!music.pushed;
-                  //ここで音楽流す
+                   music.pushed=!music.pushed;
+                   music_change(music,list);
                 });
-                //isPlaying ? _pause : _play;
+                _playMusic(music.data,music.pushed);
               },
               icon: music.pushed? Icon(Icons.play_arrow) : Icon(Icons.stop_rounded)//true:false
               ),
@@ -159,15 +178,17 @@ class _SelectPageState extends State<SelectPage> {
     if(_nCurrentValue==0){
       ScaffoldMessenger.of(context).showSnackBar(snackBar_m);
     }
-    else if(_selected.isEmpty && isVisible){
+    else if((_selected.isEmpty || _selected.length!=4) && isVisible){
       ScaffoldMessenger.of(context).showSnackBar(snackBar_p);
     }
     else{
+      player.stop();
+      music_reset(_musics);
       Navigator.push(
                     context, MaterialPageRoute(
                     builder: (context) => StartPage(
                       minutes: _nCurrentValue,
-                      music_id: selectedindex,
+                      music_data: _musics[selectedindex].data,
                      Punishment: _selected,
                      game: isVisible )));
     }
@@ -177,7 +198,15 @@ class _SelectPageState extends State<SelectPage> {
   @override
   void initState() {
     super.initState();
-    _playerState=player.state;
+    //曲が変わった時
+    player.onDurationChanged.listen((Duration d) {
+      maxSec = d.inSeconds;
+    });
+
+    // 鳴り終わったらまだ同じ音楽を
+    player.onPlayerComplete.listen((event) { 
+      player.play(AssetSource(_musics[selectedindex].data));
+    });
   }
 
   @override
@@ -196,7 +225,16 @@ class _SelectPageState extends State<SelectPage> {
         leading: IconButton(
                     iconSize: 40.0,
                   icon: Icon(Icons.arrow_back),
-                  onPressed: () => Navigator.of(context).pop()
+                  
+                  onPressed: (){
+                    player.stop();
+                    music_reset(_musics);
+                    Navigator.push(
+                      context, 
+                      MaterialPageRoute(
+                        builder: (context) => MyHomePage(),
+                  ));
+                  }
                   ),
         backgroundColor: Colors.transparent,
         
@@ -302,9 +340,9 @@ class _SelectPageState extends State<SelectPage> {
                 child: ListView(
                   
                   children: [
-                _menuItem(_musics[0]),
-                _menuItem(_musics[1]),
-                _menuItem(_musics[2]),
+                _menuItem(_musics[0],_musics),
+                _menuItem(_musics[1],_musics),
+                _menuItem(_musics[2],_musics),
                 ],
             ),
               )
