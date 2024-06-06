@@ -418,34 +418,39 @@ class _SelectPageState extends State<SelectPage> {
               )
             ),
             const Text(
-              '決定を押してください',
+              '測定ボタンを押してください',
               style: TextStyle(
                 fontFamily:'Yuji',
                 fontSize: 20,
               )
             ),
-            ElevatedButton(
-              onPressed: (){
-                inspect(_selected);
-                decidepushed();
-              },
-               child: Text(
-                '決定',
-                style: TextStyle(
-                  fontFamily:'Yuji',
-                  fontSize: 40,
-                  color: Colors.black
+            SizedBox(width: 40),
+            Container(
+              margin: EdgeInsets.only(top: 50),
+              child:
+                ElevatedButton(
+                  onPressed: (){
+                    inspect(_selected);
+                    decidepushed();
+                  },
+                  child: Text(
+                    '測定開始',
+                    style: TextStyle(
+                      fontFamily:'Yuji',
+                      fontSize: 40,
+                      color: Colors.black
+                      )
+                  ),
+                  style:ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: Colors.transparent,
+                    side: BorderSide(
+                      color: Colors.black,
+                      width:3,
+                    )
                   )
-               ),
-               style:ElevatedButton.styleFrom(
-                elevation: 0,
-                backgroundColor: Colors.transparent,
-                side: BorderSide(
-                  color: Colors.black,
-                  width:3,
-                )
-               )
-               ),
+                  )
+              ),
                
                //下の微調整
                Container(

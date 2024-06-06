@@ -28,7 +28,7 @@ List<Widget> errorTile(BuildContext context, AsyncSnapshot snapshot, WidgetRef r
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ScanScreen(),
+          builder: (context) => BluetoothOnTile(),
         ),
       );
     },

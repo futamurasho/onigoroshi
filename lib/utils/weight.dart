@@ -2,6 +2,7 @@ import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'color.dart';
@@ -213,13 +214,12 @@ Future<Map<String,String>> getMinWeightDevice(List<BluetoothDevice> connectedDev
 }
 
 
-Future<String> callstop(String deviceID, List<BluetoothDevice> connectedDevices) async {
+Future<String> callstop(String deviceID, List<BluetoothDevice> connectedDevices, dynamic player, String music) async {
+
   // コールならす
-  /* setState(() {
-      playing=!playing;
-    });
-    _playMusic(widget.music_data,playing);
-  }, */
+  player.play(AssetSource(music));
+
+
   const stop_difference = 10000;
   const limit = 684314;
   const bias = 300;
@@ -285,6 +285,7 @@ Future<String> callstop(String deviceID, List<BluetoothDevice> connectedDevices)
       }
 
       // コール止める
+      player.stop();
       return "Stopped due to significant weight change.";
     }
   }
