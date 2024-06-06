@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:onigoroshi_demo/screens/roulette_screen.dart';
+import "package:flutter_blue_plus/flutter_blue_plus.dart";
 import 'package:onigoroshi_demo/screens/start_screen.dart';
 import 'package:onigoroshi_demo/screens/select_screen.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'scan_screen.dart';
 import '../utils/weight.dart';
 import '../widgets/error_tile.dart';
+import "../utils/color.dart";
+
 
 
 //タイマーがランダムに止まる
@@ -43,6 +45,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
   @override
   void initState() {
     super.initState();
+    offlight();
     minutes=widget.minutes;
     music_data=widget.music_data;
     Punishment=widget.Punishment;
@@ -50,6 +53,12 @@ class _ResultPageState extends ConsumerState<ResultPage> {
     _minweightdevice = getMinWeightDevice(ref.read(connectedDevicesProvider));
   }
 
+  void offlight(){
+    final connectedDevices = ref.read(connectedDevicesProvider);
+    for (BluetoothDevice device in connectedDevices) {
+      writeColor(device, 6, 0);
+    }  
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:onigoroshi_demo/utils/weight.dart';
 import '../utils/snackbar.dart';
 import '../utils/color.dart';
 import '../widgets/scan_result_tile.dart';
@@ -69,7 +70,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     super.dispose();
   }
 
-  void updateConnectCount(BluetoothDevice device, bool increment) {
+  void updateConnectCount(BluetoothDevice device, bool increment) async{
     debugPrint("updateConnectCount: $increment");
     setState(() {
       if (_connectCount == 0 && increment == false) {
@@ -78,13 +79,18 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
       else{
         _connectCount += increment ? 1 : -1;
         final connectDevices = ref.read(connectedDevicesProvider.notifier);
-        int deviceIndex = connectDevices.getIndex(device) + 1;
 
         if (increment) {
           connectDevices.addDevice(device);
-          debugPrint("connectDevices: $connectDevices");  
+          final connectDevices_add = ref.read(connectedDevicesProvider.notifier);
+          int deviceIndex = connectDevices_add.getIndex(device);
+
+          debugPrint("connectDevices: $connectDevices_add");  
           debugPrint("Device Index: $deviceIndex");
+
           writeColor(device, deviceIndex, 1); // 点灯
+          firstWeightRead(device);
+
         } else {
           connectDevices.removeDevice(device);
         }
@@ -96,7 +102,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
   }
 
   // ゲーム設定ボタンが押されたときの処理
-  void onGameSettingPressed() {
+  void onGameSettingPressed() async{
     debugPrint("onGameSettingPressed");
     final connectedDevices = ref.read(connectedDevicesProvider);
     if (connectedDevices.isEmpty) {
@@ -107,7 +113,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
       for (BluetoothDevice device in connectedDevices) {
         debugPrint('Device name: ${device.platformName}');
         int deviceIndex = connectedDevices.indexOf(device);
-        writeColor(device, deviceIndex, 0); // 消灯
+        await writeColor(device, deviceIndex, 0); // 消灯
         
         device.discoverServices().then((services) {
           for (BluetoothService service in services) {
