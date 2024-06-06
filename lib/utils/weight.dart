@@ -38,7 +38,8 @@ class WeightModel {
 Future<void> setupBluetooth(List<BluetoothDevice> connectedDevices) async {
 
   for (BluetoothDevice device in connectedDevices) {
-    List<BluetoothService> services = await device.discoverServices();
+    try{
+      List<BluetoothService> services = await device.discoverServices();
     for (BluetoothService service in services) {
       var characteristics = service.characteristics;
       for(BluetoothCharacteristic c in characteristics) {
@@ -60,31 +61,39 @@ Future<void> setupBluetooth(List<BluetoothDevice> connectedDevices) async {
         }
       }
     }
+    } catch (e) {
+      debugPrint('discoverServices error: $e');
+      throw Exception("bluetooth通信にエラーが発生しました(discoverServices)");
+    }
   }
 }
 
 
-//重さの計測する非同期関数
+// 重さの計測する非同期関数
 Future<String>WeightRead(int readCount,List<BluetoothDevice> connectedDevices) async {
   List<WeightModel> results = [];
 
   for (BluetoothDevice device in connectedDevices) {
-    List<BluetoothService> services = await device.discoverServices();
-    for (BluetoothService service in services) {
-      var characteristics = service.characteristics;
-      for(BluetoothCharacteristic c in characteristics) {
-        if (c.uuid.toString() == weightCharacteristicUUID) {
-          try{
-            var value = await c.read();
-            var decodedValue = jsonDecode(utf8.decode(value)) as Map<String, dynamic>; // JSONデータをデコード
-            results.add(WeightModel.fromJson(device.remoteId.toString(), decodedValue));
-          } catch (e) {
-            debugPrint('read error: $e');
-            throw Exception("bluetooth通信にエラーが発生しました(read)");
+    try {
+      List<BluetoothService> services = await device.discoverServices();
+      for (BluetoothService service in services) {
+        var characteristics = service.characteristics;
+        for(BluetoothCharacteristic c in characteristics) {
+          if (c.uuid.toString() == weightCharacteristicUUID) {
+            try{
+              var value = await c.read();
+              var decodedValue = jsonDecode(utf8.decode(value)) as Map<String, dynamic>; // JSONデータをデコード
+              results.add(WeightModel.fromJson(device.remoteId.toString(), decodedValue));
+            } catch (e) {
+              debugPrint('read error: $e');
+              throw Exception("bluetooth通信にエラーが発生しました(read)");
+            }
           }
-          
         }
       }
+    } catch (e) {
+      debugPrint('discoverServices error: $e');
+      throw Exception("bluetooth通信にエラーが発生しました(discoverServices)");
     }
   }
 

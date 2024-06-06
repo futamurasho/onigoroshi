@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:onigoroshi_demo/screens/start_screen.dart';
 import 'package:roulette/roulette.dart';
 import 'package:onigoroshi_demo/screens/select_screen.dart';
 import 'dart:math';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../utils/color.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'scan_screen.dart';
 import '../utils/weight.dart';
 import '../widgets/error_tile.dart';
@@ -51,12 +52,21 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
     );
 
     super.initState();
+    offlight();
     minutes = widget.minutes;
     music_id = widget.music_id;
     Punishment = widget.Punishment;
     game = widget.game;
     _minweightdevice = getMinWeightDevice(ref.read(connectedDevicesProvider));
   }
+
+  void offlight(){
+    final connectedDevices = ref.read(connectedDevicesProvider);
+    for (BluetoothDevice device in connectedDevices) {
+      writeColor(device, 6, 0);
+    }  
+  }
+
 
   @override
   Widget build(BuildContext context) {

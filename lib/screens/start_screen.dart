@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:intl/intl.dart';
 import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:onigoroshi_demo/screens/select_screen.dart';
 
 import 'count_screen.dart';
 import 'scan_screen.dart';
 import '../utils/weight.dart';
 import '../widgets/error_tile.dart';
+import '../utils/color.dart';
 
 
 class StartPage extends ConsumerStatefulWidget {
@@ -55,6 +57,14 @@ class _StartPageState extends ConsumerState<StartPage> {
     setupBluetooth(connectedDevices);
   }
 
+  void constlight(){
+    final connectedDevices = ref.read(connectedDevicesProvider);
+    for (BluetoothDevice device in connectedDevices) {
+      int deviceIndex = connectedDevices.indexOf(device);
+      writeColor(device, deviceIndex, 3);
+    }  
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -98,6 +108,7 @@ class _StartPageState extends ConsumerState<StartPage> {
                                 TextButton(
                               onPressed: (){//start押された時の処理
                                 setState(toggleShow);
+                                constlight();
                                 _timer = Timer.periodic(
                                   const Duration(seconds: 1),
                                       (Timer timer){
