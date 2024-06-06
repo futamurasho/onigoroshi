@@ -8,6 +8,7 @@ import 'package:onigoroshi_demo/screens/select_screen.dart';
 import 'count_screen.dart';
 import 'scan_screen.dart';
 import '../utils/weight.dart';
+import '../widgets/error_tile.dart';
 
 
 class StartPage extends ConsumerStatefulWidget {
@@ -162,17 +163,7 @@ class _StartPageState extends ConsumerState<StartPage> {
                     
                   ];
                 } else if (snapshot.hasError) {// エラーが発生した場合の処理
-                  children = <Widget>[
-                    const Icon(
-                      Icons.error_outline,
-                      color: Colors.red,
-                      size: 60,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16),
-                      child: Text('Error: ${snapshot.error}'),
-                    ),
-                  ];
+                  children = errorTile(context, snapshot, ref);
                 } else { // 値が存在しない場合の処理
                   children = const <Widget>[
                     SizedBox(
@@ -212,7 +203,7 @@ class _StartPageState extends ConsumerState<StartPage> {
   }
 
   void change(int tmp){
-    // _stopcounter = 10;
-    _stopcounter = Random().nextInt(60*tmp-20*tmp+1)+20*tmp;
+    _stopcounter = 20;
+    // _stopcounter = Random().nextInt(60*tmp-20*tmp+1)+20*tmp;
   }
   }
