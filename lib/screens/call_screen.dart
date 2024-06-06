@@ -78,8 +78,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
             )
         ),
         child: FutureBuilder<String>(
-        //future: _minweightdevice,
-        future: _calculation,
+        future: _minweightdevice,
         builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
           List<Widget> children;
           if (snapshot.hasData) { // 値が存在する場合の処理
@@ -127,6 +126,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
                 children: <Widget>[
                   ElevatedButton(
                     onPressed: (){
+                      clearData(ref.read(connectedDevicesProvider));
                       player.stop();
                     Navigator.push(
                       context, MaterialPageRoute(
@@ -153,6 +153,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
                   ),
                   ElevatedButton(
                     onPressed: (){
+                      clearData(ref.read(connectedDevicesProvider));
                       player.stop();
                     Navigator.push(
                       context, MaterialPageRoute(

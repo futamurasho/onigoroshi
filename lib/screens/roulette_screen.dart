@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'scan_screen.dart';
 import '../utils/weight.dart';
+import '../widgets/error_tile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class RoulettePage extends ConsumerStatefulWidget {
@@ -20,8 +21,8 @@ class RoulettePage extends ConsumerStatefulWidget {
     required this.music_data,
     required this.Punishment,
     required this.game
-    });
-  
+  });
+
   @override
   ConsumerState<RoulettePage> createState() => _RoulettePageState();
 }
@@ -34,11 +35,6 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
   late String music_data;
   late List<dynamic> Punishment;
   late bool game;
-  //デバッグ用
-  final Future<String> _calculation = Future<String>.delayed(
-    const Duration(seconds: 2),
-    () => 'Data Loaded',
-    );
 
   bool _clockwise = true;
 
@@ -65,12 +61,12 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body:Container(
+      body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('images/background_2.jpeg'),
             fit: BoxFit.fill
-            )
+          )
         ),
         child: FutureBuilder<String>(
         //future: _minweightdevice,
@@ -223,68 +219,51 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
                         fontSize: 30,
                         color: Colors.black
                         )
-                        ),
-                        style:ElevatedButton.styleFrom(
-                          elevation: 0,
-                          backgroundColor: Colors.transparent,
-                          side: BorderSide(
-                            color: Colors.black,
-                            width:3,
-                            )
-                            )
-                  ),
-                ],
-               ),
-            ];
-          } else if (snapshot.hasError) {// エラーが発生した場合の処理
-            children = <Widget>[
-              const Icon(
-                Icons.error_outline,
-                color: Colors.red,
-                size: 60,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text('Error: ${snapshot.error}', 
-                    style: TextStyle(
-                                fontFamily:'Yuji',
-                                fontSize: 30,
-                                color: Colors.black
-                                )
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: Colors.transparent,
+                        side: BorderSide(
+                          color: Colors.black,
+                          width: 3,
+                        )
+                      )
+                    ),
+                  ],
                 ),
-              ),
-            ];
-          } else { // 値が存在しない場合の処理
-            children = <Widget>[
-              Container(
-                height: 400,
-              ),
-              SizedBox(
-                width: 60,
-                height: 60,
-                child: CircularProgressIndicator(),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 16),
-                child: Text(
-                  '計測中',
-                  style: TextStyle(
-                      fontFamily:'Yuji',
+              ];
+            } else if (snapshot.hasError) { // エラーが発生した場合の処理
+              children = errorTile(context, snapshot, ref);
+            } else { // 値が存在しない場合の処理
+              children = <Widget>[
+                Container(height: 400),
+                SizedBox(
+                  width: 60,
+                  height: 60,
+                  child: CircularProgressIndicator(),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 16),
+                  child: Text(
+                    '計測中',
+                    style: TextStyle(
+                      fontFamily: 'Yuji',
                       fontSize: 30,
                       color: Colors.black
-                  )),
+                    )
+                  ),
+                ),
+              ];
+            }
+            return Center(
+              child: Column(
+                children: children,
               ),
-            ];
-          }
-          return Center(
-            child: Column(
-              children: children,
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
-      ),
-   );
+    );
   }
 
   @override

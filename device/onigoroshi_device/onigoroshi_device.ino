@@ -26,11 +26,12 @@
 #include <M5StickC.h>
 #include <HX711.h>
 #include <Adafruit_NeoPixel.h>
+#include <string> // include this header to use std::string
 
 // *************************** parameters ********************************
 String deviceName = "ONIGOROSHI";
-const bool sendMode = 0; // 0:send query   1:Notify
-const int notifyInterval = 1000;  // sending interval (Notify)
+const int sendMode = 0; // 0:send query only   1:Notify when switch pressed   2:Periodic Notify
+const int notifyInterval = 1000;  // sending interval (Notify in sendMode 2)
 const int measurementInterval = 50;
 const int resolution = 10;  //set the resolution to 10 bits (0-1023)
 const int LOADCELL_DOUT_PIN = 33;
@@ -38,17 +39,49 @@ const int LOADCELL_SCK_PIN = 32;
 const int switchPin = 36;  //read only Pin
 const int ledPin = 26;
 const int numPixels = 9;
-const int brightness = 50;
-
-
+const int brightness = 100;
+const int loadingInterval = 150;
+const int blinkingInterval = 150;
 
 // JSON format : {"sensor" : (pressureValue) , "switch" : (pressCount) }
 // ***********************************************************************
+
+// ***************************** colors **********************************
+const int colorList[][3] = {
+    {255, 0, 0},      // 0:赤
+    {0, 0, 255},      // 1:青
+    {255, 255, 0},    // 2:黄
+    {0, 255, 0},      // 3:緑
+    {128, 0, 128},    // 4:紫
+    {255, 140, 160},  // 5:ピンク
+    {255, 255, 255},  // 6:白
+    {255, 145, 0},    // 7:オレンジ
+    {0, 255, 255},    // 8:水色
+    {173, 255, 47}    // 9:黄緑
+};
+
+/* mode
+  0:消灯
+  1:点灯
+  2:点滅
+  3:待機*/
+// ***********************************************************************
+
+int colorCode = 6;
+int red = 255;
+int green = 255;
+int blue = 255;
 
 int switchState = 0;
 int lastSwitchState = 0;
 int pressCount = 0;
 int pressureValue = 0;
+
+int lightColor = 6;
+int lightMode = 0;
+
+int lastLightChangeTime = 0;
+int lastLightNum = 0;
 
 HX711 scale;
 Adafruit_NeoPixel pixels(numPixels, ledPin, NEO_GRB + NEO_KHZ800);
@@ -60,46 +93,6 @@ bool oldDeviceConnected = false;
 
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
-
-#define SERVICE_UUID           (generateRandomUUID() + "0").c_str()  // UART service UUID
-#define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
-#define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
-
-class MyServerCallbacks : public BLEServerCallbacks {
-  void onConnect(BLEServer *pServer) {
-    deviceConnected = true;
-    Serial.println("connected");
-  };
-
-  void onDisconnect(BLEServer *pServer) {
-    deviceConnected = false;
-    Serial.println("disconnected");
-  }
-};
-
-class MyCallbacks : public BLECharacteristicCallbacks {
-  void onWrite(BLECharacteristic *pCharacteristic) {
-    std::string rxValue = pCharacteristic->getValue();
-    String rxValueStr = rxValue.c_str();
-
-    if (rxValueStr.length() > 0) {
-      Serial.println("*********");
-      Serial.print("Received Value: ");
-      for (int i = 0; i < rxValueStr.length(); i++) {
-        Serial.printf("%02X ", (unsigned int)rxValueStr[i]);
-      }
-      Serial.println();
-      Serial.println("*********");
-      if (rxValueStr[0] == 1){
-        for(int i=0; i<numPixels; i++) {
-          pixels.setPixelColor(i, pixels.Color(100, 255, 100));
-          pixels.show();
-          delay(1);
-        }
-      }
-    }
-  }
-};
 
 String generateRandomUUID() {
   char uuid[37];
@@ -120,6 +113,53 @@ String generateRandomUUID() {
   return String(uuid);
 }
 
+String SERVICE_UUID;
+String CHARACTERISTIC_UUID_RX = "6E400002-B5A3-F393-E0A9-E50E24DCCA9E";
+String CHARACTERISTIC_UUID_TX = "6E400003-B5A3-F393-E0A9-E50E24DCCA9E";
+
+class MyServerCallbacks : public BLEServerCallbacks {
+  void onConnect(BLEServer *pServer) {
+    deviceConnected = true;
+    Serial.println("connected");
+  };
+
+  void onDisconnect(BLEServer *pServer) {
+    deviceConnected = false;
+    Serial.println("disconnected");
+  }
+};
+
+class MyCallbacks : public BLECharacteristicCallbacks {
+  void onWrite(BLECharacteristic *pCharacteristic) {
+    std::string rxValue = pCharacteristic->getValue(); // getValue returns std::string
+
+    if (rxValue.length() > 0) {
+      Serial.println("*********");
+      Serial.print("Received Value: ");
+      for (int i = 0; i < rxValue.length(); i++) {
+        Serial.printf("%02X, ", (unsigned int)rxValue[i]);
+      }
+      Serial.println();
+      Serial.println("*********");
+      // change color
+      if((unsigned int)rxValue[0] != 0){
+        colorCode = (unsigned int)rxValue[0] - '0';
+        if(colorCode >= 0 && colorCode <= 9){
+          red = colorList[colorCode][0];
+          green = colorList[colorCode][1];
+          blue = colorList[colorCode][2];
+        }
+      }
+      // change lightmode
+      if((unsigned int)rxValue[1] != 0){
+        lightMode = (unsigned int)rxValue[1] - '0';
+      }
+      pixels.clear();
+      pixels.show();
+    }
+  }
+};
+
 void setup() {
   pinMode(LOADCELL_DOUT_PIN, INPUT);
   pinMode(LOADCELL_SCK_PIN, OUTPUT);
@@ -139,21 +179,24 @@ void setup() {
   analogReadResolution(resolution);
 
   // Create the BLE Device
-  BLEDevice::init(deviceName.c_str());
+  BLEDevice::init(deviceName.c_str()); // Convert String to const char*
 
   // Create the BLE Server
   pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
 
+  // Generate a random UUID for the service
+  SERVICE_UUID = generateRandomUUID() + "0";
+
   // Create the BLE Service
-  BLEService *pService = pServer->createService(SERVICE_UUID);
+  BLEService *pService = pServer->createService(SERVICE_UUID.c_str()); // Convert String to const char*
 
   // Create a BLE Characteristic
-  pTxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_TX, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY);
+  pTxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_TX.c_str(), BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY);
 
   pTxCharacteristic->addDescriptor(new BLE2902());
 
-  BLECharacteristic *pRxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
+  BLECharacteristic *pRxCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID_RX.c_str(), BLECharacteristic::PROPERTY_WRITE);
 
   pRxCharacteristic->setCallbacks(new MyCallbacks());
 
@@ -166,44 +209,73 @@ void setup() {
 }
 
 void loop() {
-
   if (deviceConnected) {
     //read the value
     if (scale.is_ready()) {
       pressureValue = scale.read();
     } else {
-      Serial.println("HX711 not found.");
+      //Serial.println("HX711 not found.");
     }
 
     // Read the switch state
     switchState = digitalRead(switchPin);
     if (switchState == LOW && lastSwitchState == HIGH) {
       pressCount++;
-        // pixels.setPixelColor(1, pixels.Color(100, 255, 100));
-        // pixels.show();
-        // delay(1000);
-        // pixels.clear();
-    }
-    lastSwitchState = switchState;
+      // Prepare the JSON formatted string
+      String jsonString = String("{\"sensor\":") + pressureValue + ",\"switch\":" + pressCount + "}";
+      //Serial.println(jsonString);
 
-    // Prepare the JSON formatted string
-    String jsonString = String("{\"sensor\":") + pressureValue + ",\"switch\":" + pressCount + "}";
-    Serial.println(jsonString);
-
-    // Send the JSON string
-    pTxCharacteristic->setValue(jsonString.c_str());
-
-    if (sendMode) {
-      // Check the measurement interval
-      static unsigned long lastMeasurementTime = 0;
-      unsigned long currentTime = millis();
-      if (currentTime - lastMeasurementTime >= notifyInterval) {
-        lastMeasurementTime = currentTime;
+      // Send the JSON string
+      pTxCharacteristic->setValue(jsonString.c_str());
+      if(sendMode == 1){
+        pTxCharacteristic->setValue(jsonString.c_str());
         pTxCharacteristic->notify();
         Serial.println("notified");
       }
     }
-    delay(measurementInterval);  // bluetooth stack will go into congestion, if too many packets are sent
+    delay(measurementInterval); 
+    lastSwitchState = switchState;
+
+    // set LED
+    if(lightMode == 0){
+      pixels.clear();
+      pixels.show();
+    }else if(lightMode == 1){
+      for(int i=0; i<numPixels; i++) {
+        pixels.setPixelColor(i, pixels.Color(red, green, blue));
+      }
+      pixels.show();
+    }else if(lightMode == 2){
+      for(int i=lastLightNum; i<numPixels; i += 2) {
+        pixels.setPixelColor(i, pixels.Color(red, green, blue));
+      }
+      for(int i=abs(lastLightNum-1); i<numPixels; i += 2) {
+        pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+      }
+      pixels.show();
+      if(millis() - lastLightChangeTime > blinkingInterval){
+        lastLightChangeTime = millis();
+        lastLightNum = abs(lastLightNum - 1);
+      }
+    }else if(lightMode == 3){
+      pixels.setPixelColor(lastLightNum, pixels.Color(red, green, blue));
+      pixels.show();
+      if(millis() - lastLightChangeTime > loadingInterval){
+        lastLightChangeTime = millis();
+        lastLightNum++;
+      }
+      if(lastLightNum >= numPixels){
+        lastLightNum = 0;
+      }
+    }
+
+    // Notify periodically
+    if (sendMode == 2 && (millis() % notifyInterval == 0)) {
+      String jsonString = String("{\"sensor\":") + pressureValue + ",\"switch\":" + pressCount + "}";
+      pTxCharacteristic->setValue(jsonString.c_str());
+      pTxCharacteristic->notify();
+      Serial.println("notified");
+    }
   }
 
   // disconnecting
@@ -212,10 +284,30 @@ void loop() {
     pServer->startAdvertising();  // restart advertising
     Serial.println("start advertising");
     oldDeviceConnected = deviceConnected;
+
+    pixels.clear();
+    pixels.show();
+    lightMode = 0;
+    colorCode = 6;
+    red = 255;
+    green = 255;
+    blue = 255;
   }
   // connecting
   if (deviceConnected && !oldDeviceConnected) {
     // do stuff here on connecting
     oldDeviceConnected = deviceConnected;
+    lightMode = 0;
+    colorCode = 6;
+    for(int i=0; i<3; i++) {
+      for(int j=0; j<numPixels; j++) {
+        pixels.setPixelColor(j, pixels.Color(red, green, blue));
+      }
+      pixels.show();
+      delay(300);
+      pixels.clear();
+      pixels.show();
+      delay(300);
+    }
   }
 }
