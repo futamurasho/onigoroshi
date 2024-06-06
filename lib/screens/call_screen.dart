@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onigoroshi_demo/screens/roulette_screen.dart';
 import 'package:onigoroshi_demo/screens/start_screen.dart';
 import 'package:onigoroshi_demo/screens/select_screen.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'scan_screen.dart';
 import '../utils/weight.dart';
 import '../widgets/error_tile.dart';
-import 'package:audioplayers/audioplayers.dart';
 
 
 //タイマーがランダムに止まる
@@ -37,16 +37,6 @@ class _ResultPageState extends ConsumerState<ResultPage> {
   late List<dynamic> Punishment;
   late bool game;
   final player=AudioPlayer();
-  bool playing=false;
-
-  //音楽流す
-  void _playMusic(String data,bool play) {
-    if (play) {
-      player.play(AssetSource(data));
-    } else {
-      player.pause();
-    }
-  }
   
 
 
@@ -100,7 +90,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
               );
             } else if (snapshot.hasData) {
               return FutureBuilder<String>(
-                future: callstop(snapshot.data?["mindevice"] ?? "", ref.read(connectedDevicesProvider)),
+                future: callstop(snapshot.data?["mindevice"] ?? "", ref.read(connectedDevicesProvider),player,music_data),
                 builder: (BuildContext context, AsyncSnapshot<String> stopSnapshot) {
                   if (stopSnapshot.connectionState == ConnectionState.waiting) {
                     return Column(
@@ -147,7 +137,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
                             color: Colors.black,
                           ),
                         ),
-                        SizedBox(height: 600),
+                        SizedBox(height: 500),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
@@ -244,6 +234,11 @@ class _ResultPageState extends ConsumerState<ResultPage> {
         ),
       ),
     );
+  }
+  @override
+  void dispose() {
+    player.stop();
+    super.dispose();
   }
 }
 
