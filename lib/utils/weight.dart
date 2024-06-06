@@ -51,7 +51,12 @@ Future<void> setupBluetooth(List<BluetoothDevice> connectedDevices) async {
 
           device.cancelWhenDisconnected(_buttonSubscription);
 
-          await c.setNotifyValue(true);
+          try{
+            await c.setNotifyValue(true);
+          } catch (e) {
+            debugPrint('setNotifyValue error: $e');
+            throw Exception("bluetooth通信にエラーが発生しました(notify)");
+          }
         }
       }
     }
@@ -69,10 +74,15 @@ Future<String>WeightRead(int readCount,List<BluetoothDevice> connectedDevices) a
       var characteristics = service.characteristics;
       for(BluetoothCharacteristic c in characteristics) {
         if (c.uuid.toString() == weightCharacteristicUUID) {
-          var value = await c.read();
-          var decodedValue = jsonDecode(utf8.decode(value)) as Map<String, dynamic>; // JSONデータをデコード
-          // var decodedValue = {"sensor": 666666, "switch": 0};
-          results.add(WeightModel.fromJson(device.remoteId.toString(), decodedValue));
+          try{
+            var value = await c.read();
+            var decodedValue = jsonDecode(utf8.decode(value)) as Map<String, dynamic>; // JSONデータをデコード
+            results.add(WeightModel.fromJson(device.remoteId.toString(), decodedValue));
+          } catch (e) {
+            debugPrint('read error: $e');
+            throw Exception("bluetooth通信にエラーが発生しました(read)");
+          }
+          
         }
       }
     }
@@ -97,7 +107,6 @@ Future<void> onMoreDrink(Map<String, dynamic> data , BluetoothDevice device, Lis
   }
 
   List<WeightModel> previousData = weightData["0"]!;
-
 
   if(data["switch"] % 2 == 1) {
     // 1回目のボタンpush: 差分を計算してtotalweightDataに保存
@@ -127,8 +136,6 @@ Future<void> onMoreDrink(Map<String, dynamic> data , BluetoothDevice device, Lis
 
     await writeColor(device, deviceIndex, 0);
   }
-
-  
 }
 
 
@@ -167,7 +174,10 @@ Future<String> getMinWeightDevice(List<BluetoothDevice> connectedDevices) async 
       if (latest.deviceId == previous.deviceId) {
         int latestWeight = latest.data["sensor"];
         int previousWeight = previous.data["sensor"];
-        int difference = previousWeight - latestWeight;
+        int difference = (previousWeight - latestWeight).abs();
+        if (latest.data["switch"] % 2 == 1) {  // OnMoreDrinkタイム中に測定になった場合
+          difference = 0;
+        }
         difference += totalweightData.containsKey(latest.deviceId) ? totalweightData[latest.deviceId] as int : 0;
         differences[latest.deviceId] = difference;
       }
