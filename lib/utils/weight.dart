@@ -202,7 +202,7 @@ Future<String> writeToMinDevice(String deviceID, List<BluetoothDevice> connected
 }
 
 
-Future<void> offlight(List<BluetoothDevice> connectedDevices)async{
+Future<void> offlight(List<BluetoothDevice> connectedDevices) async {
   for (BluetoothDevice device in connectedDevices) {
     await writeColor(device, 6, 0);
   }  
@@ -270,7 +270,7 @@ Future<String> callstop(String deviceID, List<BluetoothDevice> connectedDevices,
 
   const bias = 300;
   const callStopWeight = 10000;
-  const int stop_time = 15;
+  const int stop_time = 18;
 
   WeightModel? previousWeightModel;
   bool stop = false;
@@ -297,12 +297,13 @@ Future<String> callstop(String deviceID, List<BluetoothDevice> connectedDevices,
   }
 
   int previousWeight = previousWeightModel.data["sensor"];
+  var stopTask = Future.delayed(Duration(seconds: stop_time), () => true); 
 
   while (!stop) {
     await Future.delayed(Duration(seconds: 1));
+
     try {
       List<BluetoothService> services = await mindevice.discoverServices();
-      var stopTask = Future.delayed(Duration(seconds: stop_time), () => true); // 30秒後にstopをtrueにするタスクを作成
       for (BluetoothService service in services) {
         var characteristics = service.characteristics;
         for (BluetoothCharacteristic c in characteristics) {
@@ -331,7 +332,7 @@ Future<String> callstop(String deviceID, List<BluetoothDevice> connectedDevices,
       throw Exception("bluetooth通信にエラーが発生しました(discoverServices)");
     }
 
-    if (stop) {
+    if (stop || await stopTask) {
       for (BluetoothDevice device in connectedDevices) {
         await writeColor(device, connectedDevices.indexOf(device), 0);
       }

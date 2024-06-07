@@ -181,8 +181,8 @@ class _ResultPageState extends ConsumerState<ResultPage> {
                             ),
                             SizedBox(width: 10),
                             ElevatedButton(
-                              onPressed: () {
-                                clearData(ref.read(connectedDevicesProvider));
+                              onPressed: () async{
+                                await clearData(ref.read(connectedDevicesProvider));
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
