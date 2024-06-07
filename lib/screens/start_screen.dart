@@ -214,7 +214,7 @@ class _StartPageState extends ConsumerState<StartPage> {
   }
 
   void change(int tmp){
-    _stopcounter = 10;
-    // _stopcounter = Random().nextInt(60*tmp-20*tmp+1)+20*tmp;
+    // _stopcounter = 10;
+    _stopcounter = Random().nextInt(60*tmp-20*tmp+1)+20*tmp;
   }
   }

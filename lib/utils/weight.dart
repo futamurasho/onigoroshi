@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:collection/collection.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'color.dart';
@@ -192,7 +193,7 @@ Future<String> writeToMinDevice(String deviceID, List<BluetoothDevice> connected
   int deviceIndex = connectedDevices.indexOf(device);
   try{
     debugPrint('writetomindevice');
-    await writeColor(device, deviceIndex, 3);
+    await writeColor(device, deviceIndex, 1);
   } catch (e) {
     debugPrint('writeToMinDevice error: $e');
     throw Exception("bluetooth通信にエラーが発生しました(writeToMinDevice)");
@@ -212,39 +213,38 @@ Future<void> offlight(List<BluetoothDevice> connectedDevices) async {
 
 // 差分を計算して最小のデバイスを見つける関数
 Future<Map<String,String>> getMinWeightDevice(List<BluetoothDevice> connectedDevices) async {
-
+  // Ensure these functions and variables are properly defined and imported
   await offlight(connectedDevices);
-  await WeightRead(1,connectedDevices);
+  await WeightRead(1, connectedDevices);
   debugPrint('weightData: $weightData');
-
 
   List<WeightModel> previousData = weightData["0"]!;
   List<WeightModel> latestData = weightData["1"]!;
 
-  if (previousData.length != latestData.length) {
-    throw Exception("期間中bluetoothの接続が切れました");
-  }
-
   debugPrint('previousData: $previousData');
   debugPrint('latestData: $latestData');
 
-  // デバイスごとの差分を計算
+  Map<String,int> previousMap = {};
+  for (WeightModel previous in previousData) {
+    previousMap[previous.deviceId] = previous.data["sensor"];
+  }
+
+  // Calculate differences between the previous and latest weight data for each device
   Map<String, int> differences = {};
   for (WeightModel latest in latestData) {
-    for (WeightModel previous in previousData) {
-      if (latest.deviceId == previous.deviceId) {
-        int latestWeight = latest.data["sensor"];
-        int previousWeight = previous.data["sensor"];
-        int difference = (previousWeight - latestWeight).abs();
-        if (latest.data["switch"] % 2 == 1) {  // OnMoreDrinkタイム中に測定になった場合
-          difference = 0;
-        }
-        difference += totalweightData.containsKey(latest.deviceId) ? totalweightData[latest.deviceId] as int : 0;
-        differences[latest.deviceId] = difference;
+   int? matchingPrevious = previousMap[latest.deviceId];
+    if (matchingPrevious != null) {
+      int latestWeight = latest.data["sensor"] ?? 0;
+      int previousWeight = matchingPrevious;
+      int difference = (previousWeight - latestWeight).abs();
+      if (latest.data["switch"] % 2 == 1) {  // OnMoreDrink time check
+        difference = 0;
       }
+      difference += totalweightData.containsKey(latest.deviceId) ? totalweightData[latest.deviceId] as int : 0;
+      differences[latest.deviceId] = difference;
     }
   }
-  debugPrint('差分: $differences');
+  debugPrint('Differences: $differences');
 
   // 最小差分のデバイスを見つける
   String minDifferenceDevice = differences.keys.first;
@@ -262,6 +262,7 @@ Future<Map<String,String>> getMinWeightDevice(List<BluetoothDevice> connectedDev
 
   return {"color": color, "mindevice": minDifferenceDevice};
 }
+
 
 
 Future<String> callstop(String deviceID, List<BluetoothDevice> connectedDevices, dynamic player, String music) async {
@@ -348,53 +349,6 @@ Future<String> callstop(String deviceID, List<BluetoothDevice> connectedDevices,
   return "Stopped without significant weight change.";
 }
 
-Future<void> mostDifferentWeight(List<BluetoothDevice> connectedDevices)async{
-
-  const target_weight = 10000;
-
-  await offlight(connectedDevices);
-  debugPrint('weightData: $weightData');
-
-  List<WeightModel> previousData = weightData["0"]!;
-  List<WeightModel> latestData = weightData["1"]!;
-
-  if (previousData.length != latestData.length) {
-    throw Exception("期間中bluetoothの接続が切れました");
-  }
-
-  debugPrint('previousData: $previousData');
-  debugPrint('latestData: $latestData');
-
-  // デバイスごとの差分を計算
-  Map<String, int> differences = {};
-  for (WeightModel latest in latestData) {
-    for (WeightModel previous in previousData) {
-      if (latest.deviceId == previous.deviceId) {
-        int latestWeight = latest.data["sensor"];
-        int previousWeight = previous.data["sensor"];
-        int difference = (previousWeight - latestWeight).abs();
-        if (latest.data["switch"] % 2 == 1) {  // OnMoreDrinkタイム中に測定になった場合
-          difference = 0;
-        }
-        difference += totalweightData.containsKey(latest.deviceId) ? totalweightData[latest.deviceId] as int : 0;
-        debugPrint('difference: $difference');
-
-        int target = (target_weight - difference).abs();
-        differences[latest.deviceId] = target;
-      }
-    }
-  }
-  debugPrint('差分: $differences');
-
-  // 一番差分の異なるデバイスを見つける
-  var sortedEntries = differences.entries.toList()
-  ..sort((a, b) => a.value.compareTo(b.value));
-  var minDifferenceDevice = sortedEntries.first.key;
-
-
-  final color = await writeToMinDevice(minDifferenceDevice, connectedDevices);
-
-}
 
 // データをクリアする関数
 Future<void> clearData(List<BluetoothDevice> connectedDevices)async{
