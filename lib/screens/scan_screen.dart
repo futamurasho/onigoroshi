@@ -112,22 +112,9 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     else{
       for (BluetoothDevice device in connectedDevices) {
         debugPrint('Device name: ${device.platformName}');
+        await firstWeightRead(device);
         int deviceIndex = connectedDevices.indexOf(device);
         await writeColor(device, deviceIndex, 0); // 消灯
-        
-        device.discoverServices().then((services) {
-          for (BluetoothService service in services) {
-            debugPrint('Service UUID: ${service.uuid}');
-            // Get all characteristics
-            for (BluetoothCharacteristic characteristic in service.characteristics) {
-              debugPrint('Characteristic UUID: ${characteristic.uuid}');
-              debugPrint('Characteristic properties: ${characteristic.properties}');
-              }
-            }
-          }).catchError((e) {
-            Snackbar.show(ABC.b, prettyException("Discover Services Error:", e), success: false);
-            return;
-          });
       }
       onStopPressed();
       Navigator.push(context, MaterialPageRoute(builder: (_) => const SelectPage()));

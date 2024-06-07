@@ -52,19 +52,11 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
     );
 
     super.initState();
-    offlight();
     minutes=widget.minutes;
     music_data=widget.music_data;
     Punishment=widget.Punishment;
     game=widget.game;
     _minweightdevice = getMinWeightDevice(ref.read(connectedDevicesProvider));
-  }
-
-  void offlight()async{
-    final connectedDevices = ref.read(connectedDevicesProvider);
-    for (BluetoothDevice device in connectedDevices) {
-      await writeColor(device, 6, 0);
-    }  
   }
 
 

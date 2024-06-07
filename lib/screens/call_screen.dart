@@ -45,7 +45,6 @@ class _ResultPageState extends ConsumerState<ResultPage> {
   @override
   void initState() {
     super.initState();
-    offlight();
     minutes=widget.minutes;
     music_data=widget.music_data;
     Punishment=widget.Punishment;
@@ -53,8 +52,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
     _minweightdevice = getMinWeightDevice(ref.read(connectedDevicesProvider));
   }
 
-  void offlight() async{
-    debugPrint('offlight🖐️');
+  Future<void> offlight() async{
     final connectedDevices = ref.read(connectedDevicesProvider);
     for (BluetoothDevice device in connectedDevices) {
       await writeColor(device, 6, 0);
@@ -74,6 +72,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
           future: _minweightdevice,
           builder: (BuildContext context, AsyncSnapshot<Map<String, String>> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
+              offlight();
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,

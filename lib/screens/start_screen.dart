@@ -57,7 +57,7 @@ class _StartPageState extends ConsumerState<StartPage> {
     setupBluetooth(connectedDevices);
   }
 
-  void constlight()async{
+  Future<void> constlight()async{
     final connectedDevices = ref.read(connectedDevicesProvider);
     for (BluetoothDevice device in connectedDevices) {
       int deviceIndex = connectedDevices.indexOf(device);
@@ -106,9 +106,9 @@ class _StartPageState extends ConsumerState<StartPage> {
                             child: Column(
                               children: <Widget>[
                                 TextButton(
-                              onPressed: (){//start押された時の処理
+                              onPressed: () async {//start押された時の処理
                                 setState(toggleShow);
-                                constlight();
+                                await constlight();
                                 _timer = Timer.periodic(
                                   const Duration(seconds: 1),
                                       (Timer timer){
@@ -214,7 +214,7 @@ class _StartPageState extends ConsumerState<StartPage> {
   }
 
   void change(int tmp){
-    // _stopcounter = 10;
-    _stopcounter = Random().nextInt(60*tmp-20*tmp+1)+20*tmp;
+    _stopcounter = 10;
+    // _stopcounter = Random().nextInt(60*tmp-20*tmp+1)+20*tmp;
   }
   }

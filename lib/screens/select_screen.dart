@@ -128,6 +128,7 @@ class _SelectPageState extends State<SelectPage> {
     Punishment(id: 3, name: "期間限定SNSアカウント名変更"),
     Punishment(id: 4, name: "期間限定SNSアイコン変更"),
     Punishment(id: 5, name: "一枚脱ぐ"),
+    Punishment(id: 6, name: "テキーラ一気"),
   ];
 
 // コール音設定

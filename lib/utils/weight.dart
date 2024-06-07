@@ -40,7 +40,6 @@ class WeightModel {
 
 Future<void> firstWeightRead(BluetoothDevice device) async {
 
-  await Future.delayed(Duration(seconds: 1));
   try {
     await device.connect();
     List<BluetoothService> services = await device.discoverServices();
@@ -202,8 +201,17 @@ Future<String> writeToMinDevice(String deviceID, List<BluetoothDevice> connected
   return Future.value(color); 
 }
 
+
+Future<void> offlight(List<BluetoothDevice> connectedDevices)async{
+  for (BluetoothDevice device in connectedDevices) {
+    await writeColor(device, 6, 0);
+  }  
+}
+
 // 差分を計算して最小のデバイスを見つける関数
 Future<Map<String,String>> getMinWeightDevice(List<BluetoothDevice> connectedDevices) async {
+
+  await offlight(connectedDevices);
   await WeightRead(1,connectedDevices);
   debugPrint('weightData: $weightData');
 
@@ -257,7 +265,7 @@ Future<Map<String,String>> getMinWeightDevice(List<BluetoothDevice> connectedDev
 Future<String> callstop(String deviceID, List<BluetoothDevice> connectedDevices, dynamic player, String music) async {
 
   // コールならす
-  // player.setLoopMode(LoopMode.one);
+  player.setReleaseMode(ReleaseMode.loop);
   player.play(AssetSource(music));
 
   const bias = 300;
