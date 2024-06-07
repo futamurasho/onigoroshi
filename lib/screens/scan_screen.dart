@@ -71,7 +71,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     super.dispose();
   }
 
-  void updateConnectCount(BluetoothDevice device, bool increment) async{
+  void updateConnectCount(BluetoothDevice device, bool increment) {
     debugPrint("updateConnectCount: $increment");
     setState(() {
       if (_connectCount == 0 && increment == false) {
@@ -90,7 +90,6 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
           debugPrint("Device Index: $deviceIndex");
 
           writeColor(device, deviceIndex, 1); // 点灯
-          firstWeightRead(device);
 
         } else {
           connectDevices.removeDevice(device);

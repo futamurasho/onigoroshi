@@ -26,6 +26,7 @@ class MyApp extends StatelessWidget {
       ),
       home: const MyHomePage(),//test代入
       navigatorObservers: [BluetoothAdapterStateObserver()],
+      debugShowCheckedModeBanner: false,
     );
   }
 }

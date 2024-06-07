@@ -57,11 +57,11 @@ class _StartPageState extends ConsumerState<StartPage> {
     setupBluetooth(connectedDevices);
   }
 
-  void constlight(){
+  void constlight()async{
     final connectedDevices = ref.read(connectedDevicesProvider);
     for (BluetoothDevice device in connectedDevices) {
       int deviceIndex = connectedDevices.indexOf(device);
-      writeColor(device, deviceIndex, 3);
+      await writeColor(device, deviceIndex, 3);
     }  
   }
 
@@ -214,7 +214,7 @@ class _StartPageState extends ConsumerState<StartPage> {
   }
 
   void change(int tmp){
-    _stopcounter = 10;
-    // _stopcounter = Random().nextInt(60*tmp-20*tmp+1)+20*tmp;
+    // _stopcounter = 10;
+    _stopcounter = Random().nextInt(60*tmp-20*tmp+1)+20*tmp;
   }
   }

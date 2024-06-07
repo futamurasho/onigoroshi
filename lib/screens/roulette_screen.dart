@@ -60,10 +60,10 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
     _minweightdevice = getMinWeightDevice(ref.read(connectedDevicesProvider));
   }
 
-  void offlight(){
+  void offlight()async{
     final connectedDevices = ref.read(connectedDevicesProvider);
     for (BluetoothDevice device in connectedDevices) {
-      writeColor(device, 6, 0);
+      await writeColor(device, 6, 0);
     }  
   }
 
