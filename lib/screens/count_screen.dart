@@ -32,7 +32,10 @@ class _CountPageState extends ConsumerState<CountPage> {
   late bool game;
   final player=AudioPlayer();
   //ページの分岐
-  void screenselect(bool game){
+  void screenselect(bool game) async{
+
+    await offlight();
+    
     //罰ゲーム選択した場合
     if(game){
       Navigator.push(
@@ -55,6 +58,13 @@ class _CountPageState extends ConsumerState<CountPage> {
                 game: game,
               )));
     }
+  }
+
+  Future<void> offlight() async{
+    final connectedDevices = ref.read(connectedDevicesProvider);
+    for (BluetoothDevice device in connectedDevices) {
+      await writeColor(device, 6, 0);
+    }  
   }
 
   @override
