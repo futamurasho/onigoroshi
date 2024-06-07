@@ -280,7 +280,7 @@ Widget build(BuildContext context) {
               ),
               Container(
                 padding: EdgeInsets.all(15),
-                margin: EdgeInsets.only(bottom: 50),
+                margin: EdgeInsets.only(bottom: 100),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
