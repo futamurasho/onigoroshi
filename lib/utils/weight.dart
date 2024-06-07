@@ -179,7 +179,7 @@ Future<void> onMoreDrink(Map<String, dynamic> data , BluetoothDevice device, Lis
       }
     } 
 
-    await writeColor(device, deviceIndex, 0);
+    await writeColor(device, deviceIndex, 3);
   }
 }
 
