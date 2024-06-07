@@ -113,19 +113,21 @@ class _SelectPageState extends State<SelectPage> {
 
 //コール音一覧
   static List<music> _musics = [
-    music(id:0, name: '音楽1',pushed: true,data: 'maou_08_burning_heart.mp3'),
-    music(id:1, name: '音楽2',pushed: true,data: 'maou_14_shining_star.mp3'),
-    music(id:2, name: '音楽3',pushed: true,data: 'maou_39_soleil.mp3'),
+    music(id:0, name: 'コール1',pushed: true,data: 'コール1.mp3'),
+    music(id:1, name: 'コール2',pushed: true,data: 'コール2.mp3'),
+    music(id:2, name: 'コール3',pushed: true,data: 'コール3.mp3'),
+    music(id:3, name: 'コール4',pushed: true,data: 'コール4.mp3'),
+    music(id:4, name: 'コール5',pushed: true,data: 'コール5.mp3'),
   ];
   
 //罰ゲーム一覧
   static List<Punishment> _punishments = [
-    Punishment(id: 0, name: "罰ゲーム１"),
-    Punishment(id: 1, name: "罰ゲーム２"),
-    Punishment(id: 2, name: "罰ゲーム３"),
-    Punishment(id: 3, name: "罰ゲーム４"),
-    Punishment(id: 4, name: "罰ゲーム５"),
-    Punishment(id: 5, name: "罰ゲーム６"),
+    Punishment(id: 0, name: "一発芸"),
+    Punishment(id: 1, name: "モノマネ"),
+    Punishment(id: 2, name: "黒歴史発表"),
+    Punishment(id: 3, name: "期間限定SNSアカウント名変更"),
+    Punishment(id: 4, name: "期間限定SNSアイコン変更"),
+    Punishment(id: 5, name: "一枚脱ぐ"),
   ];
 
 // コール音設定
@@ -283,7 +285,7 @@ class _SelectPageState extends State<SelectPage> {
               },
               hapticFeedbackType: HapticFeedbackType.heavyImpact,
             ),
-
+            SizedBox(height: 20),
             //セグメントボタン
             SegmentedButton<int>(
               onSelectionChanged: (set) {
@@ -338,11 +340,12 @@ class _SelectPageState extends State<SelectPage> {
               child: Padding(
                 padding: const EdgeInsets.only(left: 30.0,right: 30.0,bottom: 30.0),
                 child: ListView(
-                  
                   children: [
                 _menuItem(_musics[0],_musics),
                 _menuItem(_musics[1],_musics),
                 _menuItem(_musics[2],_musics),
+                _menuItem(_musics[3],_musics),
+                _menuItem(_musics[4],_musics),
                 ],
             ),
               )
@@ -359,6 +362,16 @@ class _SelectPageState extends State<SelectPage> {
                   fontFamily:'Yuji',
                   fontSize: 25,
                   )
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: 20),
+                    child:
+                    Text(
+                      '4つ選択してください',
+                      style:TextStyle(
+                      fontFamily:'Yuji',
+                      fontSize: 18,
+                      ),)
                   ),
                   Padding(
               padding: const EdgeInsets.all(30.0),

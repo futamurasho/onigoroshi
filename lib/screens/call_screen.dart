@@ -53,10 +53,11 @@ class _ResultPageState extends ConsumerState<ResultPage> {
     _minweightdevice = getMinWeightDevice(ref.read(connectedDevicesProvider));
   }
 
-  void offlight(){
+  void offlight() async{
+    debugPrint('offlight🖐️');
     final connectedDevices = ref.read(connectedDevicesProvider);
     for (BluetoothDevice device in connectedDevices) {
-      writeColor(device, 6, 0);
+      await writeColor(device, 6, 0);
     }  
   }
   @override
@@ -127,6 +128,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
                       ],
                     );
                   } else if (stopSnapshot.hasError) {
+                    player.stop();
                     return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -134,6 +136,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
                       ),
                     );
                   } else if (stopSnapshot.hasData) {
+                    player.stop();
                     return Column(
                       children: <Widget>[
                         SizedBox(height: 100),

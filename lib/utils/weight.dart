@@ -6,7 +6,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'color.dart';
-
+import 'snackbar.dart';
 
 
 const String resultCharacteristicUUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";  // writeのUUID
@@ -40,7 +40,9 @@ class WeightModel {
 
 Future<void> firstWeightRead(BluetoothDevice device) async {
 
+  await Future.delayed(Duration(seconds: 1));
   try {
+    await device.connect();
     List<BluetoothService> services = await device.discoverServices();
     for (BluetoothService service in services) {
       var characteristics = service.characteristics;
@@ -55,14 +57,16 @@ Future<void> firstWeightRead(BluetoothDevice device) async {
             debugPrint('firstweightData: $firstweightData');
           } catch (e) {
             debugPrint('read error: $e');
-            throw Exception("bluetooth通信にエラーが発生しました(read)");
+            Snackbar.show(ABC.c, prettyException("Error:", e), success: false);
+            throw Exception("bluetooth通信にエラーが発生しました(read): $e");
           }
         }
       }
     }
   } catch (e) {
     debugPrint('discoverServices error: $e');
-    throw Exception("bluetooth通信にエラーが発生しました(discoverServices)");
+    Snackbar.show(ABC.b, prettyException("Error:", e), success: false);
+    throw Exception("bluetooth通信にエラーが発生しました(discoverServices): $e");
   }
 }
 
@@ -193,6 +197,7 @@ Future<String> writeToMinDevice(String deviceID, List<BluetoothDevice> connected
     throw Exception("bluetooth通信にエラーが発生しました(writeToMinDevice)");
   }
   final color = colorData[deviceIndex];
+  debugPrint('mincolor: $color');
 
   return Future.value(color); 
 }
@@ -252,12 +257,14 @@ Future<Map<String,String>> getMinWeightDevice(List<BluetoothDevice> connectedDev
 Future<String> callstop(String deviceID, List<BluetoothDevice> connectedDevices, dynamic player, String music) async {
 
   // コールならす
+  // player.setLoopMode(LoopMode.one);
   player.play(AssetSource(music));
 
-  const stop_difference = 100000;
   const bias = 300;
+  const glass_bias = 10000;
   WeightModel? previousWeightModel;
   bool stop = false;
+  totalweightData.clear();
 
   if (deviceID == "") {
     throw Exception("bluetoothの接続が切れました");
@@ -296,7 +303,7 @@ Future<String> callstop(String deviceID, List<BluetoothDevice> connectedDevices,
               if (currentWeight >= (limit - bias) && currentWeight <= (limit + bias)) {
                 continue;
               }
-              if ((previousWeight - currentWeight).abs() > stop_difference) {
+              if (currentWeight < (limit + glass_bias)) {
                 stop = true;
                 break;
               }

@@ -50,6 +50,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
           setState(() {
             _connectionState = BluetoothConnectionState.connected;
             widget.updateConnectCount?.call(device,true);
+            firstWeightRead(device);
           });
         }
       }).catchError((e) {
@@ -60,7 +61,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
         if (mounted) {
           setState(() {
             _connectionState = BluetoothConnectionState.disconnected;
-            // widget.updateConnectCount?.call(device,false);
+            widget.updateConnectCount?.call(device,false);
           });
         }
       }).catchError((e) {

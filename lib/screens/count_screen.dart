@@ -83,10 +83,11 @@ class _CountPageState extends ConsumerState<CountPage> {
     });
   }
 
-  void countlight(){
+  void countlight()async{
+    debugPrint('countlight🖐️');
     final connectedDevices = ref.read(connectedDevicesProvider);
     for (BluetoothDevice device in connectedDevices) {
-      writeColor(device, 6, 2);
+      await writeColor(device, 6, 2);
     }  
   }
 

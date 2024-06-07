@@ -34,16 +34,24 @@ Map <int, String> modeData = {
 
 // 引数: device, deviceIndex(色データ), mode(0:消灯、1:点灯、2:点滅)
 Future<void> writeColor(BluetoothDevice device, int deviceIndex, int mode) async {
-  
-  List<BluetoothService> services = await device.discoverServices();
-  for (BluetoothService service in services) {
-    var characteristics = service.characteristics;
-    for(BluetoothCharacteristic c in characteristics) {
-      if (c.uuid.toString() == resultCharacteristicUUID) {
-        List<int> bytes = utf8.encode('${deviceIndex.toString()}${mode.toString()}');
-        await c.write(bytes);
-        debugPrint('write color: ${colorData[deviceIndex]}, mode: ${modeData[mode]}');
+  try{
+    device.connect();
+    List<BluetoothService> services = await device.discoverServices();
+    for (BluetoothService service in services) {
+      var characteristics = service.characteristics;
+      for(BluetoothCharacteristic c in characteristics) {
+        if (c.uuid.toString() == resultCharacteristicUUID) {
+          List<int> bytes = utf8.encode('${deviceIndex.toString()}${mode.toString()}');
+          try {
+            await c.write(bytes);
+            debugPrint('write color: ${colorData[deviceIndex]}, mode: ${modeData[mode]}');
+          } catch (e) {
+            debugPrint('error: $e');
+          }
+        }
       }
     }
-  }
+    } catch (e) {
+      debugPrint('error: $e');
+    }
 }
