@@ -105,7 +105,6 @@ class _SelectPageState extends State<SelectPage> {
           fontFamily: 'Yuji',
         ),
         ),
-        elevation: 0,
         backgroundColor: Colors.transparent,
   );
   
@@ -368,7 +367,7 @@ class _SelectPageState extends State<SelectPage> {
                     margin: EdgeInsets.only(top: 20),
                     child:
                     Text(
-                      '4つ選択してください',
+                      '3つ以上選択してください',
                       style:TextStyle(
                       fontFamily:'Yuji',
                       fontSize: 18,
@@ -404,14 +403,7 @@ class _SelectPageState extends State<SelectPage> {
                   )
                   ),
 
-                  chipDisplay: MultiSelectChipDisplay(
-                    chipColor: Colors.grey,
-                    textStyle: TextStyle(
-                      color: Colors.black,
-                      fontSize: 15,
-                      fontFamily: 'Yuji'
-                    )
-                  ),
+                  chipDisplay: MultiSelectChipDisplay.none(),
                 items: _items,
                 listType: MultiSelectListType.CHIP,
                 onConfirm: (values){

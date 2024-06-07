@@ -156,14 +156,14 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         child: const Text(
           "すとっぷ",
           style: TextStyle(
-            color:Colors.black,
+            color:Colors.white,
             fontSize: 20.0,
             fontFamily: 'Yuji'
           ),
         ), 
         style:ElevatedButton.styleFrom(
                 elevation: 0,
-                backgroundColor: Colors.transparent,
+                backgroundColor: Colors.black,
                 fixedSize: Size(150, 40),
                  shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
