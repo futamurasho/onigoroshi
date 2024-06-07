@@ -43,6 +43,7 @@ class _SelectPageState extends State<SelectPage> {
   int _nCurrentValue=5;
   bool isVisible=true;
   int selectedindex=0;//選ばれた音楽のid
+  int sel=0;
   //ゲーム選択の変数
   var _gameselected=<int>{0};
   //選択された罰ゲームのリスト
@@ -155,6 +156,7 @@ class _SelectPageState extends State<SelectPage> {
                 setState(() {
                    music.pushed=!music.pushed;
                    music_change(music,list);
+                   sel=music.id;
                 });
                 _playMusic(music.data,music.pushed);
               },
@@ -207,7 +209,7 @@ class _SelectPageState extends State<SelectPage> {
 
     // 鳴り終わったらまだ同じ音楽を
     player.onPlayerComplete.listen((event) { 
-      player.play(AssetSource(_musics[selectedindex].data));
+      player.play(AssetSource(_musics[sel].data));
     });
   }
 
