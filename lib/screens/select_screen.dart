@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
 import 'package:onigoroshi_demo/main.dart';
 import 'package:wheel_slider/wheel_slider.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
@@ -41,10 +42,17 @@ class _SelectPageState extends State<SelectPage> {
   int _nTotalCount=12;
   int _nInitValue=5;
   int _nCurrentValue=5;
+  int _nTotalCount_add=20;
+  int _nInitValue_add=10;
+  int _nCurrentValue_add=10;
   bool isVisible=true;
+  bool isVisible_add=true;//trueでランダムゲーム、falseで差分のみゲーム
   int selectedindex=0;//選ばれた音楽のid
+
   //ゲーム選択の変数
   var _gameselected=<int>{0};
+  var _gameselected_add=<int>{0};
+
   //選択された罰ゲームのリスト
   List<dynamic> _selected=[];
   //音変数
@@ -82,6 +90,9 @@ class _SelectPageState extends State<SelectPage> {
   void toggleShow(){
     isVisible = !isVisible;
   }
+  void toggleShow_add(){
+    isVisible_add=!isVisible_add;
+  }
 
 //スナックバー一覧
   final snackBar_p = SnackBar(
@@ -108,6 +119,20 @@ class _SelectPageState extends State<SelectPage> {
         elevation: 0,
         backgroundColor: Colors.transparent,
   );
+
+  final snackBar_s = SnackBar(
+      content: Text(
+        '0g以外を選択してください',
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: 20,
+          fontFamily: 'Yuji',
+        ),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+  );
+
   
   final _items=_punishments.map((e) => MultiSelectItem<Punishment>(e, e.name)).toList();
 
@@ -178,8 +203,11 @@ class _SelectPageState extends State<SelectPage> {
 
   //決定押された時の処理
   void decidepushed(){
-    if(_nCurrentValue==0){
+    if(_nCurrentValue==0 && isVisible_add){
       ScaffoldMessenger.of(context).showSnackBar(snackBar_m);
+    }
+    if(_nCurrentValue_add==0 && !isVisible_add){
+      ScaffoldMessenger.of(context).showSnackBar(snackBar_s);
     }
     else if(_selected.length<=2 && isVisible){
       ScaffoldMessenger.of(context).showSnackBar(snackBar_p);
@@ -253,10 +281,88 @@ class _SelectPageState extends State<SelectPage> {
         child: Column(
           children: <Widget>[
             Container(
-              height: 150,
+              height: 120,
             ),
-
             Text(
+                'ゲーム選択',
+                 style:TextStyle(
+                  fontFamily:'Yuji',
+                  fontSize: 25,
+                  )
+            ),
+            SegmentedButton<int>(
+              onSelectionChanged: (set) {
+                setState(() {
+                  _gameselected_add=set;
+                  toggleShow_add();
+                });
+              },
+              showSelectedIcon: false,
+              segments: [
+                ButtonSegment(value: 0, label: Text(
+                  'ランダムゲーム',
+                  style:TextStyle(
+                  fontFamily:'Yuji',
+                  )
+                  )),
+                ButtonSegment(value: 1, label: Text(
+                  '差分飲みゲーム',
+                  style:TextStyle(
+                  fontFamily:'Yuji',
+                  ))
+                  ),
+                ],
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                  (Set<WidgetState> states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return Colors.grey;
+                    }
+                    return Colors.transparent;
+                  },
+                ),
+                ),
+                selected: _gameselected_add,
+                ),
+              Visibility(
+                visible: isVisible_add,
+                replacement: Column(
+                  children: <Widget>[
+                     Text(
+                '飲む量(g)',
+                 style:TextStyle(
+                  fontFamily:'Yuji',
+                  fontSize: 25,
+                  )
+                  ),
+                  //ホイール
+                  WheelSlider.number(
+                    perspective: 0.01,
+              totalCount: _nTotalCount_add,//20
+              initValue: _nInitValue_add,//10
+              interval: 10,
+              selectedNumberStyle: TextStyle(
+                fontFamily:'Yuji',
+                fontSize: 19.0,
+              ),
+              unSelectedNumberStyle: const TextStyle(
+                fontFamily:'Yuji',
+                fontSize: 15.0,
+                color: Colors.black54,
+              ),
+              currentIndex: _nCurrentValue_add,
+              onValueChanged: (val) {
+                setState(() {
+                  _nCurrentValue_add = val;
+                });
+              },
+              hapticFeedbackType: HapticFeedbackType.heavyImpact,
+            ),
+                  ],
+                ),
+                child: Column(
+                  children: <Widget>[
+                    Text(
                 '時間(分)',
                  style:TextStyle(
                   fontFamily:'Yuji',
@@ -271,11 +377,11 @@ class _SelectPageState extends State<SelectPage> {
               interval: 5,
               selectedNumberStyle: TextStyle(
                 fontFamily:'Yuji',
-                fontSize: 23.0,
+                fontSize: 19.0,
               ),
               unSelectedNumberStyle: const TextStyle(
                 fontFamily:'Yuji',
-                fontSize: 20.0,
+                fontSize: 15.0,
                 color: Colors.black54,
               ),
               currentIndex: _nCurrentValue,
@@ -286,6 +392,10 @@ class _SelectPageState extends State<SelectPage> {
               },
               hapticFeedbackType: HapticFeedbackType.heavyImpact,
             ),
+                  ],
+                ),
+              ),
+            
             SizedBox(height: 20),
             //セグメントボタン
             SegmentedButton<int>(
@@ -368,7 +478,7 @@ class _SelectPageState extends State<SelectPage> {
                     margin: EdgeInsets.only(top: 20),
                     child:
                     Text(
-                      '4つ選択してください',
+                      '3つ以上選択してください',
                       style:TextStyle(
                       fontFamily:'Yuji',
                       fontSize: 18,
@@ -404,14 +514,7 @@ class _SelectPageState extends State<SelectPage> {
                   )
                   ),
 
-                  chipDisplay: MultiSelectChipDisplay(
-                    chipColor: Colors.grey,
-                    textStyle: TextStyle(
-                      color: Colors.black,
-                      fontSize: 15,
-                      fontFamily: 'Yuji'
-                    )
-                  ),
+                  chipDisplay: MultiSelectChipDisplay.none(),
                 items: _items,
                 listType: MultiSelectListType.CHIP,
                 onConfirm: (values){
