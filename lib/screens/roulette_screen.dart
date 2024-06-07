@@ -38,15 +38,18 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
 
   bool _clockwise = true;
 
+  List<RouletteUnit> roulette_set(int l){
+    List<RouletteUnit> tmp=[];
+    for(int i=1;i<l+1;i++){
+       tmp.add(RouletteUnit.text('${i}',textStyle: TextStyle(color: Colors.black,fontSize: 20),color: Colors.transparent));
+    }
+    return tmp;
+  }
+
   @override
   void initState() {
     _controller = RouletteController(
-        group: RouletteGroup([
-          const RouletteUnit.text('1',textStyle: TextStyle(color: Colors.black,fontSize: 20),color: Colors.transparent),
-          const RouletteUnit.text('2',textStyle: TextStyle(color: Colors.black,fontSize: 20),color: Colors.transparent),
-          const RouletteUnit.text('3',textStyle: TextStyle(color: Colors.black,fontSize: 20),color: Colors.transparent),
-          const RouletteUnit.text('4',textStyle: TextStyle(color: Colors.black,fontSize: 20),color: Colors.transparent),
-        ]),
+        group: RouletteGroup(roulette_set(widget.Punishment.length)),
         vsync: this
     );
 
@@ -69,8 +72,7 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
           )
         ),
         child: FutureBuilder<String>(
-        //future: _minweightdevice,
-        future: _calculation,
+        future: _minweightdevice,
         builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
           List<Widget> children;
           if (snapshot.hasData) { // 値が存在する場合の処理
@@ -145,30 +147,14 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
               Container(
                 height: 30,
               ),
-              Text('1:${widget.Punishment[0].name}',
+              for(int i=1;i<widget.Punishment.length+1;i++)...{
+                Text('${i}:${widget.Punishment[i-1].name}',
               style: TextStyle(
                       fontFamily:'Yuji',
-                      fontSize: 30,
+                      fontSize: 20,
                       color: Colors.black
                   )),
-              Text('2:${widget.Punishment[1].name}',
-              style: TextStyle(
-                      fontFamily:'Yuji',
-                      fontSize: 30,
-                      color: Colors.black
-                  )),
-              Text('3:${widget.Punishment[2].name}',
-              style: TextStyle(
-                      fontFamily:'Yuji',
-                      fontSize: 30,
-                      color: Colors.black
-                  )),
-              Text('4:${widget.Punishment[3].name}',
-              style: TextStyle(
-                      fontFamily:'Yuji',
-                      fontSize: 30,
-                      color: Colors.black
-                  )),
+              },
               Container(
                 height: 20,
               ),

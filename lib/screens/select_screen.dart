@@ -86,7 +86,7 @@ class _SelectPageState extends State<SelectPage> {
 //スナックバー一覧
   final snackBar_p = SnackBar(
       content: Text(
-        '罰ゲームを4つ選択してください',
+        '罰ゲームを3つ以上選択してください',
         style: TextStyle(
           color: Colors.black,
           fontSize: 20,
@@ -178,7 +178,7 @@ class _SelectPageState extends State<SelectPage> {
     if(_nCurrentValue==0){
       ScaffoldMessenger.of(context).showSnackBar(snackBar_m);
     }
-    else if((_selected.isEmpty || _selected.length!=4) && isVisible){
+    else if(_selected.length<=2 && isVisible){
       ScaffoldMessenger.of(context).showSnackBar(snackBar_p);
     }
     else{
