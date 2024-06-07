@@ -3,7 +3,13 @@ import 'dart:async';
 import 'package:onigoroshi_demo/screens/call_screen.dart';
 import 'package:onigoroshi_demo/screens/roulette_screen.dart';
 import 'package:audioplayers/audioplayers.dart';
-class CountPage extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'scan_screen.dart';
+import '../utils/color.dart';
+
+
+class CountPage extends ConsumerStatefulWidget {
   final int minutes;
   final String music_data;
   final List<dynamic> Punishment;
@@ -15,10 +21,10 @@ class CountPage extends StatefulWidget {
     required this.Punishment,
     required this.game});
   @override
-  State<CountPage> createState() => _CountPageState();
+  ConsumerState<CountPage> createState() => _CountPageState();
 }
 
-class _CountPageState extends State<CountPage> {
+class _CountPageState extends ConsumerState<CountPage> {
   int _counter = 3;//初期値
   late int minutes;
   late List<dynamic> Punishment;
@@ -54,6 +60,7 @@ class _CountPageState extends State<CountPage> {
   @override
   void initState() {
     super.initState();
+    countlight();
     minutes=widget.minutes;
     Punishment=widget.Punishment;
     music_data=widget.music_data;
@@ -75,6 +82,15 @@ class _CountPageState extends State<CountPage> {
       screenselect(widget.game);
     });
   }
+
+  void countlight()async{
+    debugPrint('countlight🖐️');
+    final connectedDevices = ref.read(connectedDevicesProvider);
+    for (BluetoothDevice device in connectedDevices) {
+      await writeColor(device, 6, 2);
+    }  
+  }
+
   @override
   Widget build(BuildContext context) {
 

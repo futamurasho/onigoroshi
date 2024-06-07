@@ -134,7 +134,23 @@ class MyCallbacks : public BLECharacteristicCallbacks {
       }
       // change lightmode
       if((unsigned int)rxValue[1] != 0){
-        lightMode = (unsigned int)rxValue[1] - '0';
+        //reset swich state
+        if((unsigned int)rxValue[1] - '0' == 4){
+          colorCode = 6;
+          red = 255;
+          green = 255;
+          blue = 255;
+
+          switchState = 0;
+          lastSwitchState = 0;
+          pressCount = 0;
+          pressureValue = 0;
+
+          lightColor = 6;
+          lightMode = 0;
+        }else{
+          lightMode = (unsigned int)rxValue[1] - '0';
+        }
       }
       pixels.clear();
       pixels.show();

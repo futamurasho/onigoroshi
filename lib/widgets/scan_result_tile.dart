@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import '../utils/extra.dart';
 import '../utils/snackbar.dart';
+import '../utils/weight.dart';
 
 class ScanResultTile extends StatefulWidget {
   const ScanResultTile({Key? key, required this.result, this.updateConnectCount}) : super(key: key);
@@ -59,7 +60,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
         if (mounted) {
           setState(() {
             _connectionState = BluetoothConnectionState.disconnected;
-            // widget.updateConnectCount?.call(device,false);
+            widget.updateConnectCount?.call(device,false);
           });
         }
       }).catchError((e) {

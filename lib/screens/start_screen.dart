@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:intl/intl.dart';
 import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:onigoroshi_demo/screens/select_screen.dart';
 
 import 'count_screen.dart';
 import 'scan_screen.dart';
 import '../utils/weight.dart';
 import '../widgets/error_tile.dart';
+import '../utils/color.dart';
 
 
 class StartPage extends ConsumerStatefulWidget {
@@ -55,6 +57,14 @@ class _StartPageState extends ConsumerState<StartPage> {
     setupBluetooth(connectedDevices);
   }
 
+  Future<void> constlight()async{
+    final connectedDevices = ref.read(connectedDevicesProvider);
+    for (BluetoothDevice device in connectedDevices) {
+      int deviceIndex = connectedDevices.indexOf(device);
+      await writeColor(device, deviceIndex, 3);
+    }  
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -96,8 +106,9 @@ class _StartPageState extends ConsumerState<StartPage> {
                             child: Column(
                               children: <Widget>[
                                 TextButton(
-                              onPressed: (){//start押された時の処理
+                              onPressed: () async {//start押された時の処理
                                 setState(toggleShow);
+                                await constlight();
                                 _timer = Timer.periodic(
                                   const Duration(seconds: 1),
                                       (Timer timer){
@@ -203,7 +214,7 @@ class _StartPageState extends ConsumerState<StartPage> {
   }
 
   void change(int tmp){
-    _stopcounter = 20;
+    _stopcounter = 10;
     // _stopcounter = Random().nextInt(60*tmp-20*tmp+1)+20*tmp;
   }
   }

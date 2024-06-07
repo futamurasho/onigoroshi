@@ -26,6 +26,7 @@ class MyApp extends StatelessWidget {
       ),
       home: const MyHomePage(),//test代入
       navigatorObservers: [BluetoothAdapterStateObserver()],
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -120,19 +121,12 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       onTap: (){
-      /*Navigator.push(
+      Navigator.push(
                   context, 
                   MaterialPageRoute(
                     builder: (context) => BluetoothOnTile(),
                   ));
-      },*/
-      Navigator.push(
-                  context, 
-                  MaterialPageRoute(
-                    builder: (context) => SelectPage(),
-                  ));
-      },
-      
+      },  
     ),
       ),
     );

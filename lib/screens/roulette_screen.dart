@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:onigoroshi_demo/screens/start_screen.dart';
 import 'package:roulette/roulette.dart';
 import 'package:onigoroshi_demo/screens/select_screen.dart';
 import 'dart:math';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../utils/color.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'scan_screen.dart';
 import '../utils/weight.dart';
 import '../widgets/error_tile.dart';
@@ -29,7 +30,7 @@ class RoulettePage extends ConsumerStatefulWidget {
 
 class _RoulettePageState extends ConsumerState<RoulettePage>
     with SingleTickerProviderStateMixin {
-  late Future<String> _minweightdevice;
+  late Future<Map<String,String>> _minweightdevice;
   late RouletteController _controller;
   late int minutes;
   late String music_data;
@@ -61,6 +62,7 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
     _minweightdevice = getMinWeightDevice(ref.read(connectedDevicesProvider));
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,17 +73,15 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
             fit: BoxFit.fill
           )
         ),
-        child: FutureBuilder<String>(
-        future: _minweightdevice,
-        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-          List<Widget> children;
-          if (snapshot.hasData) { // 値が存在する場合の処理
-            children = <Widget>[
-              Container(
-                height: 80,
-              ),
-               Text(
-                  'この間一番飲んでいなかった人は\n${snapshot.data}\nのコースターの人でした！',
+        child: FutureBuilder<Map<String,String>>(
+          future: _minweightdevice,
+          builder: (BuildContext context, AsyncSnapshot<Map<String,String>> snapshot) {
+            List<Widget> children;
+            if (snapshot.hasData) { // 値が存在する場合の処理
+              children = <Widget>[
+                Container(height: 80),
+                Text(
+                  'この期間一番飲んでいなかった人は\n${snapshot.data!["color"]}\nのコースターの人でした！',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                                 fontFamily:'Yuji',
@@ -163,6 +163,7 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
                 children: <Widget>[
                   ElevatedButton(
                     onPressed: (){
+                      clearData(ref.read(connectedDevicesProvider));
                     Navigator.push(
                       context, MaterialPageRoute(
                         builder: (context) => const SelectPage(),));},
@@ -188,6 +189,7 @@ class _RoulettePageState extends ConsumerState<RoulettePage>
                   ),
                   ElevatedButton(
                     onPressed: (){
+                      clearData(ref.read(connectedDevicesProvider));
                     Navigator.push(
                       context, MaterialPageRoute(
                         builder: (context) => StartPage(
