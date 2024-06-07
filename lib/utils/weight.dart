@@ -269,7 +269,9 @@ Future<String> callstop(String deviceID, List<BluetoothDevice> connectedDevices,
   player.play(AssetSource(music));
 
   const bias = 300;
-  const glass_bias = 10000;
+  const callStopWeight = 10000;
+  const int stop_time = 15;
+
   WeightModel? previousWeightModel;
   bool stop = false;
   totalweightData.clear();
@@ -300,6 +302,7 @@ Future<String> callstop(String deviceID, List<BluetoothDevice> connectedDevices,
     await Future.delayed(Duration(seconds: 1));
     try {
       List<BluetoothService> services = await mindevice.discoverServices();
+      var stopTask = Future.delayed(Duration(seconds: stop_time), () => true); // 30秒後にstopをtrueにするタスクを作成
       for (BluetoothService service in services) {
         var characteristics = service.characteristics;
         for (BluetoothCharacteristic c in characteristics) {
@@ -311,7 +314,7 @@ Future<String> callstop(String deviceID, List<BluetoothDevice> connectedDevices,
               if (currentWeight >= (limit - bias) && currentWeight <= (limit + bias)) {
                 continue;
               }
-              if (currentWeight < (limit + glass_bias)) {
+              if ((previousWeight - currentWeight).abs() > callStopWeight) {
                 stop = true;
                 break;
               }
@@ -321,7 +324,7 @@ Future<String> callstop(String deviceID, List<BluetoothDevice> connectedDevices,
             }
           }
         }
-        if (stop) break;
+        if (stop || await stopTask) break;
       }
     } catch (e) {
       debugPrint('discoverServices error: $e');
